@@ -1,102 +1,127 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, Image, Platform, View, Text, Pressable } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useContext, useEffect, useState, createContext, useCallback} from 'react';
+
+import { MarkerData } from '.';
+
+export const RideContext = createContext({
+  currentRideHandler: undefined as (() => void) | undefined,
+  setCurrentRideHandler: (ride: (() => void) | undefined) => {},
+});
+
+export function RideProvider({ children }: { children: React.ReactNode }) {
+  const [currentRideHandler, setCurrentRideHandler] = useState<(() => void) | undefined>(undefined);
+
+  return (
+    <RideContext.Provider value={{ setCurrentRideHandler, currentRideHandler }}>
+      {children}
+    </RideContext.Provider>
+  );
+}
 
 export default function TabTwoScreen() {
+  const { currentRideHandler, setCurrentRideHandler } = useContext(RideContext);
+
+  const [currentRide, setCurrentRide] = useState<MarkerData | undefined>(undefined);
+
+  const fetchCurrentRide = useCallback(async () => {
+    const response = await fetch('http://10.0.8.104:8000/users/reserved');
+    const data = await response.json();
+
+    data.last_used_on = new Date(data.last_used_on);
+    
+    if(data){
+      setCurrentRide(data);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCurrentRide();
+    setCurrentRideHandler(fetchCurrentRide);
+  }, [fetchCurrentRide, setCurrentRideHandler, setCurrentRide]);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={<Ionicons size={310} name="code-slash" style={styles.headerImage} />}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText> library
-          to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.view}>
+      <StatusBar style="dark" animated={true}/> 
+      <Text style={styles.title}>Huidige Rit</Text>
+      <Text style={styles.bikeName}>{currentRide?.name}</Text>
+      <Text style={styles.superText}>Code:</Text>
+      <Text style={styles.subText}>{currentRide?.code}</Text>
+      <Text style={styles.superText}>Laatst gebruikt door:</Text>
+      <Text style={styles.subText}>{currentRide?.last_used_by ?? '-'} : {currentRide?.last_used_on?.toDateString() ?? '-'}</Text>
+      <Text style={styles.superText}>Totale afstand gereden:</Text>
+      <Text style={styles.subText}>10km</Text>
+
+      <Text style={styles.superText}>In gebruik sinds:</Text>
+      <Text style={styles.subText}>27 Jun 2024 - 2:06:32:15</Text>
+
+      <Pressable style={styles.endRide} onPress={fetchCurrentRide}>
+        <Text style={styles.endRideText}>Rit beeindigen</Text>
+      </Pressable>
+
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  view: {
+    flex: 1,
+    backgroundColor: 'white',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  title: {
+    fontSize: 50,
+    fontWeight: 'bold',
+    margin: 10,
+  },
+
+  bikeName: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    margin: 10,
+    marginLeft: 20,
+    color: 'teal',
+  },
+
+  subText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    marginLeft: 20,
+    marginBottom: 10,
+  },
+
+  superText: {
+    fontSize: 20,
+    marginLeft: 20,
+  },
+
+  endRide: {
+    display: 'flex',
+    backgroundColor: 'teal',
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    aspectRatio: 6,
+    // margin: 20,
+
+    position: 'absolute',
+    bottom: 20,
+    left: '5%',
+  },
+
+  endRideText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
