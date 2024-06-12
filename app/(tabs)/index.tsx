@@ -1,13 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
-import { StyleSheet, View, Text, Modal, Button, TouchableWithoutFeedback, Pressable, KeyboardAvoidingView, FlatList } from 'react-native';
+import { StyleSheet, View, Text, Modal, Button, TouchableWithoutFeedback, Pressable, KeyboardAvoidingView, FlatList, TouchableOpacity, Image } from 'react-native';
 
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 
-import { RideContext } from './explore';
+import RideContext from '@/hooks/RideProvider';
 
-export type MarkerData = {
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { ServerInfo } from '@/constants/Server';
+import Capability from '@/components/Capability';
+
+export type BikeState = {
+  light: number,
+  gears: number,
+  carrier: number,
+  crate: number,
+  tires: number,
+}
+
+export type BikeData = {
   id: string,
   name: string,
   code: number,
@@ -17,14 +29,14 @@ export type MarkerData = {
   is_in_use: boolean,
   last_used_by: string | null,
   last_used_on: Date | null,
-  capabilities: string[],
+  capabilities: BikeState;
 };
 
 export default function App() {
-  const [[modalVisible, modalData], setModalVisible] = useState<[boolean, MarkerData | undefined]>([false, undefined]);
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [modalData, setModalVisible] = useState<BikeData | undefined>(undefined);
+  const [markers, setMarkers] = useState<BikeData[]>([]);
 
-  const { currentRideHandler, setCurrentRideHandler } = useContext(RideContext);
+  const { currentRide, fetchCurrentRide, endCurrentRide } = useContext(RideContext);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,23 +50,30 @@ export default function App() {
 
   const fetchMarkers = async () => {
     try {
-      const response = await fetch('http://10.0.8.104:8000/bikes/list');
+      const response = await fetch(`http://${ServerInfo.ip}:${ServerInfo.port}/bikes/list`);
       const data = await response.json();
 
       for (let i = 0; i < data.length; i++) {
         data[i].last_used_on = new Date(data[i].last_used_on);
+        data[i].capabilities = {
+          tires: data[i].capabilities.tires ?? 0,
+          light: data[i].capabilities.light ?? 0,
+          gears: data[i].capabilities.gears ?? 0,
+          carrier: data[i].capabilities.carrier ?? 0,
+          crate: data[i].capabilities.crate ?? 0,
+        };
       }
 
-      const items = data as MarkerData[];
+      const items = data as BikeData[];
 
       setMarkers(items);
 
-      setModalVisible(([modalVisible, modalData]) => {
+      setModalVisible((modalData) => {
         const newData = items.find(x => x.id == modalData?.id);
-        if(newData && modalVisible && modalData){
-          return [modalVisible, newData];
+        if(newData && modalData){
+          return newData;
         } else {
-          return [modalVisible, modalData];
+          return modalData;
         }
       });
       
@@ -63,23 +82,21 @@ export default function App() {
     }
   };
 
-  const attemptReserve = async (marker: MarkerData) => {
+  const attemptReserve = async (marker: BikeData) => {
     try {
-      const response = await fetch(`http://10.0.8.104:8000/bikes/reserve/${marker.id}/`, {
+      const response = await fetch(`http://${ServerInfo.ip}:${ServerInfo.port}/bikes/reserve/${marker.id}/`, {
         method: 'POST',
       });
 
       if (response.ok) {
-        setModalVisible([false, undefined]);
+        setModalVisible(undefined);
 
         Toast.show({
           type: 'success',
           text1: `Fiets ${marker.name} gereserveerd!`
         });
 
-        console.log(currentRideHandler);
-
-        currentRideHandler?.();
+        fetchCurrentRide();
       } else {
         Toast.show({
           type: 'error',
@@ -92,18 +109,27 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    fetchMarkers();
+  }, [currentRide]);
+
   return (
     <View>
       <MapView 
         style={styles.map}
+        showsUserLocation={true}
+        rotateEnabled={false}
+        pitchEnabled={false}
+        region={{latitude: 52.370216, longitude: 4.895168, latitudeDelta: 0.3, longitudeDelta: 0.15}}
       >
         {markers.map((marker, index) => (
           <Marker
             key={marker.id + marker.is_in_use}
             coordinate={{ latitude: parseFloat(marker.latitude), longitude: parseFloat(marker.longitude) }}
             pinColor={marker.is_in_use ? 'purple' : 'teal'}
+
             onPress={() => {
-              setModalVisible([true, marker]);
+              setModalVisible(marker);
             }}
           />
         ))}
@@ -112,38 +138,43 @@ export default function App() {
       <Modal
         animationType='slide'
         transparent={true}
-        visible={modalVisible}
-        pointerEvents={modalVisible ? 'auto' : 'none'}
+        visible={modalData !== undefined}
+        pointerEvents={modalData ? 'auto' : 'none'}
         onRequestClose={() => {
-          setModalVisible([false, undefined]);
+          setModalVisible(undefined);
         }}>
 
-        <TouchableWithoutFeedback onPress={() => setModalVisible([false, undefined])}>
+        <TouchableWithoutFeedback onPress={() => setModalVisible(undefined)}>
           <View style={styles.bottomView}>
             <TouchableWithoutFeedback>
               <View style={styles.modalView}>
                 <View style={styles.rowView}>
-                  <Text style={styles.modalTitle}>{modalData?.name}</Text>
-                  <FlatList
-                    contentContainerStyle={{ flex: 1, alignItems: 'center'}}
-                    horizontal={true}
-                    data={[
-                      ["light", "flashlight"],
-                      ["gears", "cog"],
-                      ["crate", "basket"],
-                      ["carrier", "logo-dropbox"]]}
-                    renderItem={({ item }) => (
-                      <Ionicons name={item[1]} style={modalData?.capabilities.find(x => x == item[0]) ? styles.bikeIcon : styles.bikeIconDisabled}/>
-                    )}
-                  />
-                </View>
-                <Text style={styles.superText}>Code:</Text>
-                <Text style={styles.subText}>{modalData?.code}</Text>
-                <Text style={styles.superText}>Laatst gebruikt door:</Text>
-                <Text style={styles.subText}>{modalData?.last_used_by ?? '-'} : {modalData?.last_used_on?.toDateString() ?? '-'}</Text>
-                <Text style={styles.superText}>Totale afstand gereden:</Text>
-                <Text style={styles.subText}>10km</Text>
+                  <View style={{width: '50%', marginRight: 10}}>
+                    <View style={styles.rowView}>
+                      <Text style={styles.modalTitle}>{modalData?.name}</Text>
+                      <FlatList
+                        contentContainerStyle={{ flex: 1, alignItems: 'center'}}
+                        horizontal={true}
+                        data={["tires","light","gears","carrier","crate"]}
+                        renderItem={({ item }) => (
+                          <Capability type={item} state={modalData.capabilities[item]} style={styles.bikeIcon} />
+                        )}
+                      />
+                    </View>
 
+                    {/* <Text style={styles.superText}>Code:</Text>
+                    <Text style={styles.subText}>{modalData?.code}</Text> */}
+                  
+                    <Text style={styles.superText}>Laatst gebruikt door:</Text>
+                    <Text style={styles.subText}>{modalData?.last_used_by ?? '-'} : {modalData?.last_used_on?.toDateString() ?? '-'}</Text>
+                    <Text style={styles.superText}>Totale afstand gereden:</Text>
+                    <Text style={styles.subText}>10km</Text>
+                  </View>
+                  <View style={{flex: 1}}>
+                    <Image source={{uri: `http://${ServerInfo.ip}:${ServerInfo.port}/bikes/image/${modalData?.id}`}} style={{ width: '100%', aspectRatio: 1, borderRadius: 10 }} />
+                  </View>
+                </View>
+                
                 <Pressable
                   style={modalData?.is_in_use ? [styles.reserveButtonBase, styles.reserveButtonDisabled] : styles.reserveButtonBase}
                   onPress={() => {
@@ -157,7 +188,6 @@ export default function App() {
               </View>
             </TouchableWithoutFeedback>
           </View>
-
         </TouchableWithoutFeedback>
       </Modal>
 
@@ -227,17 +257,12 @@ const styles = StyleSheet.create({
   bikeIcon: {
     fontSize: 20,
     margin: 1,
-    color: 'teal',
   },
-  bikeIconDisabled: {
-    fontSize: 20,
-    color: 'gray',
-  },
+
   modalTitle: {
-    // flex: 2,
     fontSize: 30,
     marginBottom: 10,
-    marginRight: 10,
+    marginRight: 5,
     textAlign: "left",
   },
 
