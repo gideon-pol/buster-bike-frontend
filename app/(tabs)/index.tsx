@@ -30,6 +30,7 @@ export type BikeData = {
   last_used_by: string | null,
   last_used_on: Date | null,
   capabilities: BikeState;
+  notes: string;
 };
 
 export default function App() {
@@ -174,6 +175,10 @@ export default function App() {
                     <Image source={{uri: `http://${ServerInfo.ip}:${ServerInfo.port}/bikes/image/${modalData?.id}`}} style={{ width: '100%', aspectRatio: 1, borderRadius: 10 }} />
                   </View>
                 </View>
+
+                <View>
+                  <Text style={styles.notes}>{modalData?.notes}</Text>
+                </View>
                 
                 <Pressable
                   style={modalData?.is_in_use ? [styles.reserveButtonBase, styles.reserveButtonDisabled] : styles.reserveButtonBase}
@@ -230,7 +235,7 @@ const styles = StyleSheet.create({
   modalView: {
     display: 'flex',
     width: '98%',
-    height: '40%',
+    height: '50%',
     backgroundColor: "white",
     borderRadius: 20,
     borderBottomLeftRadius: 0,
@@ -292,13 +297,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'teal',
     padding: 10,
     borderRadius: 10,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
     position: 'absolute',
-    bottom: 0,
+    bottom: 10,
     alignSelf: 'center',
   },
 
@@ -340,4 +343,10 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: 10,
   },
+
+  notes: {
+    marginTop: 10,
+    fontStyle: 'italic',
+    color: 'grey',
+  }
 });

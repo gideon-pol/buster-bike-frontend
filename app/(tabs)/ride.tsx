@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform, View, Text, Pressable, TouchableWithoutFeedback, Modal } from 'react-native';
+import { StyleSheet, Image, Platform, View, Text, Pressable, TouchableWithoutFeedback, Modal, BackHandler } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -8,7 +8,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { useContext, useEffect, useState, createContext, useCallback} from 'react';
+import { useContext, useEffect, useState, createContext, useCallback, useRef} from 'react';
 
 import RideContext from '@/hooks/RideProvider';
 
@@ -18,6 +18,8 @@ import { BikeState } from '.';
 import Periodic from '@/components/Periodic';
 import Capability from '@/components/Capability';
 import { ServerInfo } from '@/constants/Server';
+import { Gesture, GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
+import { LinearGradient }from 'expo-linear-gradient';
 
 export default function TabTwoScreen() {
   const {currentRide, fetchCurrentRide, endCurrentRide} = useContext(RideContext);
@@ -31,18 +33,33 @@ export default function TabTwoScreen() {
     crate: 0,
   });
 
+  const [modalUp, setModalUp] = useState<boolean>(false);
+
   let view = null;
 
   const cycleState = (capability: string) => {
     setBikeCapabilities((prev) => {
-      const n = {...prev, [capability]: ((prev[capability] ?? 0) + 1) % 4};
+      const n = {...prev, [capability]: ((prev[capability] ?? 0) + 3) % 4};
       currentRide.capabilities = n;
       return n;
     });
   };
 
+  
   useEffect(() => {
     fetchCurrentRide();
+    }, []);
+    
+  const textInputRef = useRef(null);
+  useEffect(() => {
+    const backAction = () => {
+      textInputRef.current.blur();
+      return true; // This will prevent the app from closing
+    };
+  
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  
+    return () => backHandler.remove();
   }, []);
 
   useEffect(() => {
@@ -77,7 +94,7 @@ export default function TabTwoScreen() {
 
         {/* <Image source={{uri: `http://${ServerInfo.ip}:${ServerInfo.port}/bikes/image/${currentRide?.id}`}} style={{ width: '20%', height: '20%' }} /> */}
 
-        <Pressable style={styles.endRide} onPress={() => {setModalVisible(true); }}>
+        <Pressable style={styles.endRide} onPress={() => {setModalUp(false); setModalVisible(true); }}>
           <Text style={styles.endRideText}>Rit beeindigen</Text>
         </Pressable>
 
@@ -90,57 +107,84 @@ export default function TabTwoScreen() {
             setModalVisible(false);
           }}>
 
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-            <View style={styles.bottomView}>
-              <TouchableWithoutFeedback>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalTitle}>Werkt alles nog?</Text>
-                  <View style={styles.rowView}>
-                    <Capability type="tires" state={bikeCapabilities?.tires} style={styles.icon} onPress={()=>cycleState("tires")}/>
-                    <Text style={styles.statusText}>
-                      {["Band(en) is/zijn kapot",
-                      "Band(en) is/zijn plat",
-                      "Band(en) is/zijn zacht",
-                      "Banden zijn hard"][bikeCapabilities?.tires]}
-                    </Text>
-                  </View>
-                  <View style={styles.rowView}>
-                    <Capability type="light" state={bikeCapabilities?.light} style={styles.icon} onPress={()=>cycleState("light")}/>
-                    <Text style={styles.statusText}>
-                      {["Lichten missen",
-                      "Licht(en) is/zijn leeg",
-                      "Licht(en) is/zijn zwak",
-                      "Lichten zijn helder"][bikeCapabilities?.light]}
-                    </Text>
-                  </View>
-                  <View style={styles.rowView}>
-                    <Capability type="gears" state={bikeCapabilities?.gears} style={styles.icon} onPress={()=>cycleState("gears")}/>
-                    <Text style={styles.statusText}>
-                      {["Versnellingen missen",
-                      "Versnellingen zijn kapot",
-                      "Versnellingen zijn ...",
-                      "Versnellingen werken",][bikeCapabilities?.gears]}
-                    </Text>
-                  </View>
-                  <View style={styles.rowView}>
-                    <Capability type="carrier" state={bikeCapabilities?.carrier} style={styles.icon} onPress={()=>cycleState("carrier")}/>
-                    <Text style={styles.statusText}>Bagagedrager is goed</Text>
-                  </View>
-                  <View style={styles.rowView}>
-                    <Capability type="crate" state={bikeCapabilities?.crate} style={styles.icon} onPress={()=>cycleState("crate")}/>
-                    <Text style={styles.statusText}>Krat is goed</Text>
-                  </View>
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,1)']}
+            start={{x: 0, y: 0}}
+            end={{x: 0, y: 0.7}}
+            style={{width: '100%', height: '100%'}}>
+            <TouchableWithoutFeedback onPress={() => setModalVisible(false)} >
+              <GestureHandlerRootView style={styles.bottomView}>
+                <TouchableWithoutFeedback onPress={()=>textInputRef?.current?.blur()}>
+                  <View style={[styles.modalView, modalUp ? {height: '100%'} : null]}>
+                    <Text style={styles.modalTitle}>Werkt alles nog?</Text>
+                    <Text style={styles.modalSubTitle}>Klik de icoontjes</Text>
+                    <View style={styles.rowView}>
+                      <Capability type="tires" state={bikeCapabilities?.tires} style={styles.icon} onPress={()=>cycleState("tires")}/>
+                      <Text style={styles.statusText}>
+                        {["Band(en) is/zijn kapot",
+                        "Band(en) is/zijn plat",
+                        "Band(en) is/zijn zacht",
+                        "Banden zijn hard"][bikeCapabilities?.tires]}
+                      </Text>
+                    </View>
+                    <View style={styles.rowView}>
+                      <Capability type="light" state={bikeCapabilities?.light} style={styles.icon} onPress={()=>cycleState("light")}/>
+                      <Text style={styles.statusText}>
+                        {["Lichten missen",
+                        "Licht(en) is/zijn leeg",
+                        "Licht(en) is/zijn zwak",
+                        "Lichten zijn helder"][bikeCapabilities?.light]}
+                      </Text>
+                    </View>
+                    <View style={styles.rowView}>
+                      <Capability type="gears" state={bikeCapabilities?.gears} style={styles.icon} onPress={()=>cycleState("gears")}/>
+                      <Text style={styles.statusText}>
+                        {["Versnellingen missen",
+                        "Versnellingen zijn kapot",
+                        "Versnellingen werken half",
+                        "Versnellingen werken",][bikeCapabilities?.gears]}
+                      </Text>
+                    </View>
+                    <View style={styles.rowView}>
+                      <Capability type="carrier" state={bikeCapabilities?.carrier} style={styles.icon} onPress={()=>cycleState("carrier")}/>
+                      <Text style={styles.statusText}>
+                        {["Bagagedrager mist",
+                        "Bagagedrager is kapot",
+                        "Bagagedrager is gammel",
+                        "Bagagedrager is stevig",][bikeCapabilities?.carrier]}
+                      </Text>
+                    </View>
+                    <View style={styles.rowView}>
+                      <Capability type="crate" state={bikeCapabilities?.crate} style={styles.icon} onPress={()=>cycleState("crate")}/>
+                      <Text style={styles.statusText}>
+                        {["Krat mist",
+                        "Krat is kapot",
+                        "Krat is gammel",
+                        "Krat is stevig",][bikeCapabilities?.crate]}
+                      </Text>
+                    </View>
 
-                  <Pressable style={[ styles.endRide, styles.endRideConfirm] } onPress={() => {setModalVisible(false); endCurrentRide();}}>
-                    <Text style={[ styles.endRideText, styles.endRideConfirmText]}>Confirm</Text>
-                  </Pressable>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
+                    <View style={{flex: 1, width: '100%', marginTop: 5, marginBottom: 20, backgroundColor: '#1c1c1c', padding: 5, borderRadius: 10}}>
+                      <TextInput 
+                        ref={textInputRef}
+                        maxLength={400}
+                        multiline={true}
+                        style={styles.notes}
+                        onFocus={()=>setModalUp(true)}
+                        onBlur={()=>setModalUp(false)}
+                        onChangeText={(e) => currentRide.notes = e}
+                      >{currentRide?.notes}</TextInput>
+                    </View>
+
+                    <Pressable style={[ styles.endRide, styles.endRideConfirm] } onPress={() => {setModalVisible(false); endCurrentRide();}}>
+                      <Text style={[ styles.endRideText, styles.endRideConfirmText]}>Confirm</Text>
+                    </Pressable>
+                  </View>
+                </TouchableWithoutFeedback>
+              </GestureHandlerRootView>
+            </TouchableWithoutFeedback>
+          </LinearGradient>
         </Modal>
-
-
       </SafeAreaView>
     );
   } else {
@@ -157,8 +201,8 @@ export default function TabTwoScreen() {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-
-    const formattedTime = `${days}:${hours % 24}:${minutes % 60}:${seconds % 60}`;
+  
+    const formattedTime = `${days.toString().padStart(2, '0')}:${(hours % 24).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
     return formattedTime;
   }
 }
@@ -171,14 +215,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 50,
     fontWeight: 'bold',
-    margin: 10,
+    margin: '2%',
   },
 
   bikeName: {
     fontSize: 40,
     fontWeight: 'bold',
-    margin: 10,
-    marginLeft: 20,
+    margin: '2%',
+    marginLeft: '5%',
     color: 'teal',
   },
 
@@ -201,13 +245,11 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
     width: '90%',
+    height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    aspectRatio: 6,
-    // margin: 20,
-
     position: 'absolute',
-    bottom: 20,
+    bottom: 10,
     left: '5%',
   },
 
@@ -218,8 +260,10 @@ const styles = StyleSheet.create({
   },
 
   endRideConfirm: {
+    position: 'relative',
     backgroundColor: 'white',
     width: '100%',
+    left: 0,
   },
 
   endRideConfirmText: {
@@ -235,22 +279,25 @@ const styles = StyleSheet.create({
   modalView: {
     display: 'flex',
     width: '98%',
-    height: '60%',
-    backgroundColor: "black",
+    height: '70%',
+    backgroundColor: 'black',
     borderRadius: 20,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     padding: 20,
     paddingVertical: 20,
-    alignItems: "flex-start",
-    shadowColor: "#000",
+    alignItems: "flex-start"
+  },
+
+  shadow: {
+    shadowColor: 'purple',
     shadowOffset: {
-      width: 0,
-      height: 2
+      width: 2,
+      height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 1,
     shadowRadius: 4,
-    elevation: 5
+    elevation: 20,
   },
 
   modalTitle: {
@@ -258,9 +305,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     fontSize: 30,
-    marginBottom: 10,
     marginRight: 10,
     textAlign: "left",
+  },
+
+  modalSubTitle: {
+    color: 'gray',
+    fontSize: 15,
+    fontStyle: 'italic',
+    marginTop: -2,
+    // marginLeft: 12,
+    marginBottom: 10
   },
 
   rowView: {
@@ -288,4 +343,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 20,
   },
+
+  notes: {
+    color: 'gray',
+    fontSize: 15,
+    width: '100%',
+    height: '100%',
+    textAlignVertical: 'top',
+  }
 });
