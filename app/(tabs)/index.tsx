@@ -201,6 +201,10 @@ export default function App() {
     fetchMarkers();
   }, [currentRide]);
 
+
+  
+
+
   return (
     <View>
       <MapView
@@ -339,6 +343,7 @@ export default function App() {
           </TouchableWithoutFeedback>
         </LinearGradient>
       </Modal>
+
 
       {/* <Modal
         animationType='fade'
