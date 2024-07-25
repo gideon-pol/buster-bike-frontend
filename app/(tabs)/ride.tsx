@@ -1,28 +1,50 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform, View, Text, Pressable, TouchableWithoutFeedback, Modal, BackHandler } from 'react-native';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  StyleSheet,
+  Image,
+  Platform,
+  View,
+  Text,
+  Pressable,
+  TouchableWithoutFeedback,
+  Modal,
+  BackHandler,
+} from "react-native";
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useContext, useEffect, useState, createContext, useCallback, useRef} from 'react';
+import { Collapsible } from "@/components/Collapsible";
+import { ExternalLink } from "@/components/ExternalLink";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import {
+  useContext,
+  useEffect,
+  useState,
+  createContext,
+  useCallback,
+  useRef,
+} from "react";
 
-import RideContext from '@/hooks/RideProvider';
+import RideContext from "@/hooks/RideProvider";
 
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Periodic from "@/components/Periodic";
+import Capability from "@/components/Capability";
+import { BikeState } from "@/constants/Types";
 
-import { BikeState } from '.';
-import Periodic from '@/components/Periodic';
-import Capability from '@/components/Capability';
-import { ServerInfo } from '@/constants/Server';
-import { Gesture, GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
-import { LinearGradient }from 'expo-linear-gradient';
+import {
+  Gesture,
+  GestureHandlerRootView,
+  TextInput,
+} from "react-native-gesture-handler";
+import { LinearGradient } from "expo-linear-gradient";
+import { DefaultStyle } from "@/constants/Style";
+import { Colors } from "@/constants/Style";
 
 export default function TabTwoScreen() {
-  const {currentRide, fetchCurrentRide, endCurrentRide} = useContext(RideContext);
+  const { currentRide, fetchCurrentRide, endCurrentRide } =
+    useContext(RideContext);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [bikeCapabilities, setBikeCapabilities] = useState<BikeState>({
@@ -39,145 +61,231 @@ export default function TabTwoScreen() {
 
   const cycleState = (capability: string) => {
     setBikeCapabilities((prev) => {
-      const n = {...prev, [capability]: ((prev[capability] ?? 0) + 3) % 4};
-      currentRide.capabilities = n;
+      const n = { ...prev, [capability]: ((prev[capability] ?? 0) + 3) % 4 };
+      currentRide.bike.capabilities = n;
       return n;
     });
   };
 
-  
   useEffect(() => {
     fetchCurrentRide();
-    }, []);
-    
-  const textInputRef = useRef(null);
-  useEffect(() => {
-    const backAction = () => {
-      textInputRef.current.blur();
-      return true; // This will prevent the app from closing
-    };
-  
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-  
-    return () => backHandler.remove();
   }, []);
 
+  const textInputRef = useRef(null);
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     textInputRef.current.blur();
+  //     return true; // This will prevent the app from closing
+  //   };
+
+  //   const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+  //   return () => backHandler.remove();
+  // }, []);
+
   useEffect(() => {
-    if(currentRide){
-      setBikeCapabilities(currentRide.capabilities);
+    if (currentRide) {
+      setBikeCapabilities(currentRide.bike.capabilities);
     }
   }, [currentRide]);
 
-  if(currentRide){
+  if (currentRide) {
     view = (
-      <SafeAreaView style={styles.view}>
-        <StatusBar style="dark" animated={true}/> 
-        <Text style={styles.title}>Huidige Rit</Text>
-        <Text style={styles.bikeName}>{currentRide?.name}</Text>
+      <SafeAreaView style={DefaultStyle.view}>
+        <StatusBar style="dark" animated={true} />
+        <Text style={DefaultStyle.viewTitle}>Huidige Rit</Text>
+        <Text style={styles.bikeName}>{currentRide?.bike.name}</Text>
         <Text style={styles.superText}>Code:</Text>
-        <Text style={styles.subText}>{currentRide?.code}</Text>
+        <Text style={styles.subText}>{currentRide?.bike.code}</Text>
         <Text style={styles.superText}>Totale afstand gereden:</Text>
         <Periodic interval={30000}>
           {() => (
-          <Text style={styles.subText}>10km</Text>
+            <Text style={styles.subText}>
+              {currentRide.total_distance.toFixed(1)}km
+            </Text>
           )}
         </Periodic>
 
         <Text style={styles.superText}>In gebruik sinds:</Text>
         <Periodic interval={1000}>
-        {() => (
-          <Text style={styles.subText}>
-            {currentRide?.last_used_on?.toDateString() ?? '-'} - {formatTime(Date.now() - (currentRide?.last_used_on?.getTime() ?? 0))}
-          </Text>
-        )}
+          {() => (
+            <Text style={styles.subText}>
+              {currentRide?.bike.last_used_on?.toDateString() ?? "-"} -{" "}
+              {formatTime(
+                Date.now() - (currentRide?.bike.last_used_on?.getTime() ?? 0)
+              )}
+            </Text>
+          )}
         </Periodic>
 
-        {/* <Image source={{uri: `http://${ServerInfo.ip}:${ServerInfo.port}/bikes/image/${currentRide?.id}`}} style={{ width: '20%', height: '20%' }} /> */}
+        {/* <Image source={{uri: `${ServerInfo.url}/bikes/image/${currentRide?.id}`}} style={{ width: '20%', height: '20%' }} /> */}
 
-        <Pressable style={styles.endRide} onPress={() => {setModalUp(false); setModalVisible(true); }}>
+        <Pressable
+          style={styles.endRideButton}
+          onPress={() => {
+            setModalUp(false);
+            setModalVisible(true);
+          }}
+        >
           <Text style={styles.endRideText}>Rit beeindigen</Text>
         </Pressable>
 
         <Modal
-          animationType='slide'
+          animationType="slide"
           transparent={true}
           visible={modalVisible}
-          pointerEvents={modalVisible ? 'auto' : 'none'}
+          pointerEvents={modalVisible ? "auto" : "none"}
           onRequestClose={() => {
             setModalVisible(false);
-          }}>
-
+          }}
+        >
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,1)']}
-            start={{x: 0, y: 0}}
-            end={{x: 0, y: 0.7}}
-            style={{width: '100%', height: '100%'}}>
-            <TouchableWithoutFeedback onPress={() => setModalVisible(false)} >
+            colors={["rgba(1,1,1,0)", "rgba(255,255,255,1)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 0.7 }}
+            style={{ width: "100%", height: "100%" }}
+          >
+            <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <GestureHandlerRootView style={styles.bottomView}>
-                <TouchableWithoutFeedback onPress={()=>textInputRef?.current?.blur()}>
-                  <View style={[styles.modalView, modalUp ? {height: '100%'} : null]}>
+                <TouchableWithoutFeedback
+                  onPress={() => textInputRef?.current?.blur()}
+                >
+                  <View
+                    style={[
+                      styles.modalView,
+                      modalUp ? { height: "100%" } : null,
+                    ]}
+                  >
                     <Text style={styles.modalTitle}>Werkt alles nog?</Text>
                     <Text style={styles.modalSubTitle}>Klik de icoontjes</Text>
                     <View style={styles.rowView}>
-                      <Capability type="tires" state={bikeCapabilities?.tires} style={styles.icon} onPress={()=>cycleState("tires")}/>
+                      <Capability
+                        type="tires"
+                        state={bikeCapabilities?.tires}
+                        style={styles.icon}
+                        onPress={() => cycleState("tires")}
+                      />
                       <Text style={styles.statusText}>
-                        {["Band(en) is/zijn kapot",
-                        "Band(en) is/zijn plat",
-                        "Band(en) is/zijn zacht",
-                        "Banden zijn hard"][bikeCapabilities?.tires]}
+                        {
+                          [
+                            "Band(en) is/zijn kapot",
+                            "Band(en) is/zijn plat",
+                            "Band(en) is/zijn zacht",
+                            "Banden zijn hard",
+                          ][bikeCapabilities?.tires]
+                        }
                       </Text>
                     </View>
                     <View style={styles.rowView}>
-                      <Capability type="light" state={bikeCapabilities?.light} style={styles.icon} onPress={()=>cycleState("light")}/>
+                      <Capability
+                        type="light"
+                        state={bikeCapabilities?.light}
+                        style={styles.icon}
+                        onPress={() => cycleState("light")}
+                      />
                       <Text style={styles.statusText}>
-                        {["Lichten missen",
-                        "Licht(en) is/zijn leeg",
-                        "Licht(en) is/zijn zwak",
-                        "Lichten zijn helder"][bikeCapabilities?.light]}
+                        {
+                          [
+                            "Lichten missen",
+                            "Licht(en) is/zijn leeg",
+                            "Licht(en) is/zijn zwak",
+                            "Lichten zijn helder",
+                          ][bikeCapabilities?.light]
+                        }
                       </Text>
                     </View>
                     <View style={styles.rowView}>
-                      <Capability type="gears" state={bikeCapabilities?.gears} style={styles.icon} onPress={()=>cycleState("gears")}/>
+                      <Capability
+                        type="gears"
+                        state={bikeCapabilities?.gears}
+                        style={styles.icon}
+                        onPress={() => cycleState("gears")}
+                      />
                       <Text style={styles.statusText}>
-                        {["Versnellingen missen",
-                        "Versnellingen zijn kapot",
-                        "Versnellingen werken half",
-                        "Versnellingen werken",][bikeCapabilities?.gears]}
+                        {
+                          [
+                            "Versnellingen missen",
+                            "Versnellingen zijn kapot",
+                            "Versnellingen werken half",
+                            "Versnellingen werken",
+                          ][bikeCapabilities?.gears]
+                        }
                       </Text>
                     </View>
                     <View style={styles.rowView}>
-                      <Capability type="carrier" state={bikeCapabilities?.carrier} style={styles.icon} onPress={()=>cycleState("carrier")}/>
+                      <Capability
+                        type="carrier"
+                        state={bikeCapabilities?.carrier}
+                        style={styles.icon}
+                        onPress={() => cycleState("carrier")}
+                      />
                       <Text style={styles.statusText}>
-                        {["Bagagedrager mist",
-                        "Bagagedrager is kapot",
-                        "Bagagedrager is gammel",
-                        "Bagagedrager is stevig",][bikeCapabilities?.carrier]}
+                        {
+                          [
+                            "Bagagedrager mist",
+                            "Bagagedrager is kapot",
+                            "Bagagedrager is gammel",
+                            "Bagagedrager is stevig",
+                          ][bikeCapabilities?.carrier]
+                        }
                       </Text>
                     </View>
                     <View style={styles.rowView}>
-                      <Capability type="crate" state={bikeCapabilities?.crate} style={styles.icon} onPress={()=>cycleState("crate")}/>
+                      <Capability
+                        type="crate"
+                        state={bikeCapabilities?.crate}
+                        style={styles.icon}
+                        onPress={() => cycleState("crate")}
+                      />
                       <Text style={styles.statusText}>
-                        {["Krat mist",
-                        "Krat is kapot",
-                        "Krat is gammel",
-                        "Krat is stevig",][bikeCapabilities?.crate]}
+                        {
+                          [
+                            "Krat mist",
+                            "Krat is kapot",
+                            "Krat is gammel",
+                            "Krat is stevig",
+                          ][bikeCapabilities?.crate]
+                        }
                       </Text>
                     </View>
 
-                    <View style={{flex: 1, width: '100%', marginTop: 5, marginBottom: 20, backgroundColor: '#1c1c1c', padding: 5, borderRadius: 10}}>
-                      <TextInput 
+                    <View
+                      style={{
+                        flex: 1,
+                        width: "100%",
+                        marginTop: 5,
+                        marginBottom: 20,
+                        backgroundColor: "#1c1c1c",
+                        padding: 5,
+                        borderRadius: 10,
+                      }}
+                    >
+                      <TextInput
+                        placeholderTextColor={"gray"}
                         ref={textInputRef}
                         maxLength={400}
                         multiline={true}
                         style={styles.notes}
-                        onFocus={()=>setModalUp(true)}
-                        onBlur={()=>setModalUp(false)}
-                        onChangeText={(e) => currentRide.notes = e}
-                      >{currentRide?.notes}</TextInput>
+                        onFocus={() => setModalUp(true)}
+                        onBlur={() => setModalUp(false)}
+                        onChangeText={(e) => (currentRide.bike.notes = e)}
+                      >
+                        {currentRide?.notes}
+                      </TextInput>
                     </View>
 
-                    <Pressable style={[ styles.endRide, styles.endRideConfirm] } onPress={() => {setModalVisible(false); endCurrentRide();}}>
-                      <Text style={[ styles.endRideText, styles.endRideConfirmText]}>Confirm</Text>
+                    <Pressable
+                      style={[styles.endRideButton, styles.endRideConfirm]}
+                      onPress={() => {
+                        setModalVisible(false);
+                        endCurrentRide();
+                      }}
+                    >
+                      <Text
+                        style={[styles.endRideText, styles.endRideConfirmText]}
+                      >
+                        Confirm
+                      </Text>
                     </Pressable>
                   </View>
                 </TouchableWithoutFeedback>
@@ -188,10 +296,12 @@ export default function TabTwoScreen() {
       </SafeAreaView>
     );
   } else {
-    view = (<SafeAreaView style={styles.view}>
-        <StatusBar style="dark" animated={true}/> 
-        <Text style={styles.title}>Geen Rit</Text>
-    </SafeAreaView>);
+    view = (
+      <SafeAreaView style={DefaultStyle.view}>
+        <StatusBar style="dark" animated={true} />
+        <Text style={DefaultStyle.viewTitle}>Geen Rit</Text>
+      </SafeAreaView>
+    );
   }
 
   return view;
@@ -201,96 +311,94 @@ export default function TabTwoScreen() {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-  
-    const formattedTime = `${days.toString().padStart(2, '0')}:${(hours % 24).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+
+    const formattedTime = `${days.toString().padStart(2, "0")}:${(hours % 24)
+      .toString()
+      .padStart(2, "0")}:${(minutes % 60).toString().padStart(2, "0")}:${(
+      seconds % 60
+    )
+      .toString()
+      .padStart(2, "0")}`;
     return formattedTime;
   }
 }
 
 const styles = StyleSheet.create({
-  view: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  title: {
-    fontSize: 50,
-    fontWeight: 'bold',
-    margin: '2%',
-  },
-
   bikeName: {
     fontSize: 40,
-    fontWeight: 'bold',
-    margin: '2%',
-    marginLeft: '5%',
-    color: 'teal',
+    fontWeight: "bold",
+    margin: "2%",
+    marginLeft: "5%",
+    color: "teal",
   },
 
   subText: {
     fontSize: 25,
-    fontWeight: 'bold',
-    marginLeft: 20,
+    fontWeight: "bold",
+    marginLeft: "5%",
     marginBottom: 10,
+    color: Colors.text,
   },
 
   superText: {
     fontSize: 20,
-    marginLeft: 20,
+    marginLeft: "5%",
+    color: Colors.text,
   },
 
-  endRide: {
-    display: 'flex',
-    backgroundColor: 'teal',
+  endRideButton: {
+    display: "flex",
+    backgroundColor: "teal",
     borderRadius: 10,
     padding: 10,
     elevation: 2,
-    width: '90%',
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
+    width: "90%",
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
     bottom: 10,
-    left: '5%',
+    left: "5%",
   },
 
   endRideText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
 
   endRideConfirm: {
-    position: 'relative',
-    backgroundColor: 'white',
-    width: '100%',
+    position: "relative",
+    backgroundColor: "white",
+    width: "100%",
     left: 0,
   },
 
   endRideConfirmText: {
-    color: 'black',
+    color: "black",
   },
 
   bottomView: {
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
-    marginTop: 22
+    marginTop: 22,
   },
   modalView: {
-    display: 'flex',
-    width: '98%',
-    height: '70%',
-    backgroundColor: 'black',
+    display: "flex",
+    width: "98%",
+    height: "70%",
+    backgroundColor: "black",
     borderRadius: 20,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     padding: 20,
     paddingVertical: 20,
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   },
 
   shadow: {
-    shadowColor: 'purple',
+    shadowColor: "purple",
     shadowOffset: {
       width: 2,
       height: 2,
@@ -302,39 +410,39 @@ const styles = StyleSheet.create({
 
   modalTitle: {
     // flex: 2,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     fontSize: 30,
     marginRight: 10,
     textAlign: "left",
   },
 
   modalSubTitle: {
-    color: 'gray',
+    color: "gray",
     fontSize: 15,
-    fontStyle: 'italic',
+    fontStyle: "italic",
     marginTop: -2,
     // marginLeft: 12,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   rowView: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
 
   statusText: {
     fontSize: 20,
-    color: 'white',
-    textAlignVertical: 'center'
+    color: "white",
+    textAlignVertical: "center",
   },
 
   icon: {
     fontSize: 50,
     margin: 2,
     // color: 'red',
-    shadowColor: 'black',
+    shadowColor: "black",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -345,10 +453,10 @@ const styles = StyleSheet.create({
   },
 
   notes: {
-    color: 'gray',
+    color: "gray",
     fontSize: 15,
-    width: '100%',
-    height: '100%',
-    textAlignVertical: 'top',
-  }
+    width: "100%",
+    height: "100%",
+    textAlignVertical: "top",
+  },
 });

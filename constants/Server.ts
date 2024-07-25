@@ -1,6 +1,6 @@
-
-
 export const ServerInfo = {
-    ip: "192.168.137.155",
-    port: 8000
+    // ip: "10.0.8.104",
+    // port: 8000,
+    // url: "http://10.0.8.104:8000"
+    url: "https://api.busterbike.nl"
 }

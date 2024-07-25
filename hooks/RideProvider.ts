@@ -1,8 +1,9 @@
-import { MarkerData } from '@/app/(tabs)';
+// import { MarkerData } from '@/app/(tabs)';
+import { RideData } from '@/app/(tabs)';
 import { createContext } from 'react';
 
 const RideContext = createContext({
-  currentRide: undefined as MarkerData | undefined,
+  currentRide: undefined as RideData | undefined,
   fetchCurrentRide: async () => {},
   endCurrentRide: async () => {},
 });
