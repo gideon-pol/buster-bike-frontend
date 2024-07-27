@@ -56,7 +56,6 @@ const deg2rad = (deg: number) => {
   return deg * (Math.PI / 180);
 };
 
-
 export default function App() {
   const navigation = useNavigation();
 
@@ -72,6 +71,7 @@ export default function App() {
   const [locationBlocked, setLocationBlocked] = useState(false);
 
   useEffect(() => {
+    fetchCurrentRide();
     const interval = setInterval(() => {
       fetchMarkers();
     }, 5000);
@@ -109,7 +109,6 @@ export default function App() {
         let location = await Location.getCurrentPositionAsync({});
 
         if (currentRide) {
-
           if (currentRide) {
             const oldLat = parseFloat(currentRide.last_latitude);
             const oldLon = parseFloat(currentRide.last_longitude);
@@ -172,19 +171,19 @@ export default function App() {
     // make sure the distance is less than 100m
     let location = await Location.getCurrentPositionAsync({});
     const distance = calculateDistance(
-        location.coords.latitude,
-        location.coords.longitude,
-        parseFloat(marker.latitude),
-        parseFloat(marker.longitude)
-      );
+      location.coords.latitude,
+      location.coords.longitude,
+      parseFloat(marker.latitude),
+      parseFloat(marker.longitude)
+    );
 
-      if (distance > 0.05) {
-        Toast.show({
-          type: "error",
-          text1: "Je bent te ver weg van de fiets!",
-        });
-        return;
-      }
+    if (distance > 0.05) {
+      Toast.show({
+        type: "error",
+        text1: "Je bent te ver weg van de fiets!",
+      });
+      return;
+    }
     try {
       const response = await authenticatedFetch(
         `${ServerInfo.url}/bikes/reserve/${marker.id}/`,
@@ -377,9 +376,13 @@ export default function App() {
       <Toast />
       {currentRide && (
         <View style={styles.smallWindow}>
-          <Text style={styles.subText}>Huidige rit:</Text>
-          <Text style={styles.subText}>{currentRide.bike.name}</Text>
+          <TouchableWithoutFeedback onPress={() => navigation.navigate("ride")}>
+          <View>
+            <Text style={styles.subText}>Huidige rit:</Text>
+            <Text style={styles.subText}>{currentRide.bike.name}</Text>
           </View>
+          </TouchableWithoutFeedback>
+        </View>
       )}
     </View>
   );
