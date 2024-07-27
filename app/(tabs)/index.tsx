@@ -64,7 +64,6 @@ export default function App() {
     undefined
   );
   const [markers, setMarkers] = useState<BikeData[]>([]);
-
   const { currentRide, fetchCurrentRide, endCurrentRide } =
     useContext(RideContext);
 
@@ -376,11 +375,28 @@ export default function App() {
         </View>
       </Modal> */}
       <Toast />
+      {currentRide && (
+        <View style={styles.smallWindow}>
+          <Text style={styles.subText}>Huidige rit:</Text>
+          <Text style={styles.subText}>{currentRide.bike.name}</Text>
+          </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  smallWindow: {
+    position: "absolute",
+    top: "88%",
+    left: "67%",
+    width: "30%",
+    height: "10%",
+    backgroundColor: Colors.accent,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+  },
   container: {
     flex: 1,
   },
