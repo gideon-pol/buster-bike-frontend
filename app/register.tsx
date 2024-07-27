@@ -1,5 +1,6 @@
 import { ServerInfo } from "@/constants/Server";
 import { Colors, DefaultStyle } from "@/constants/Style";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
 import React, {
@@ -10,6 +11,7 @@ import React, {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState("");
@@ -42,9 +44,12 @@ export default function RegisterScreen() {
 
     if (response.status === 200) {
       console.log("Registered successfully");
+      const body = await response.json();
+      await AsyncStorage.setItem("token", body["token"]);
+      console.log("Got token", body["token"]);
       navigation.navigate("index");
     } else {
-      console.log("Failed to register", response.body);
+      console.log("Failed to register", response);
     }
   };
 
@@ -87,7 +92,8 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
-    borderColor: "white",
+    borderColor: Colors.text,
+    color: Colors.text,
     width: "90%",
     left: "5%",
     height: 60,

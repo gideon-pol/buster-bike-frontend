@@ -92,7 +92,7 @@ export default function TabTwoScreen() {
   if (currentRide) {
     view = (
       <SafeAreaView style={DefaultStyle.view}>
-        <StatusBar style="dark" animated={true} />
+        {/* <StatusBar style="dark" animated={true} /> */}
         <Text style={DefaultStyle.viewTitle}>Huidige Rit</Text>
         <Text style={styles.bikeName}>{currentRide?.bike.name}</Text>
         <Text style={styles.superText}>Code:</Text>
@@ -298,7 +298,7 @@ export default function TabTwoScreen() {
   } else {
     view = (
       <SafeAreaView style={DefaultStyle.view}>
-        <StatusBar style="dark" animated={true} />
+        {/* <StatusBar style="dark" animated={true} /> */}
         <Text style={DefaultStyle.viewTitle}>Geen Rit</Text>
       </SafeAreaView>
     );

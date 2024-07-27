@@ -1,6 +1,6 @@
 import { Colors, DefaultStyle } from "@/constants/Style";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authenticatedFetch } from "../fetch";
 import { ServerInfo } from "@/constants/Server";
@@ -35,9 +35,10 @@ export default function UserScreen() {
   };
 
   useEffect(() => {
+    fetchUserData();
     const interval = setInterval(() => {
       fetchUserData();
-    }, 1000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -61,6 +62,12 @@ export default function UserScreen() {
       router.back();
     }
     router.replace("/login");
+  };
+
+  const [deletePopupVisible, setDeletePopupVisible] = useState(false);
+
+  const deletePopup = async () => {
+    setDeletePopupVisible(true);
   };
 
   return (
@@ -94,6 +101,102 @@ export default function UserScreen() {
       <Pressable style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Uitloggen</Text>
       </Pressable>
+      <Pressable style={styles.deleteAccountButton} onPress={deletePopup}>
+        <Text style={styles.deleteAccountButtonText}>Verwijder Account</Text>
+      </Pressable>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={deletePopupVisible}
+        onRequestClose={() => {
+          setDeletePopupVisible(false);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              width: "90%",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}
+            >
+              Weet je zeker dat je je account wilt verwijderen?
+            </Text>
+            <Pressable
+              style={{
+                backgroundColor: "red",
+                borderRadius: 10,
+                padding: 10,
+                elevation: 2,
+                width: "90%",
+                height: 60,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 10,
+              }}
+              onPress={async () => {
+                const response = await authenticatedFetch(
+                  `${ServerInfo.url}/users/delete/`,
+                  {
+                    method: "POST",
+                  }
+                );
+
+                if (response.ok) {
+                  setUserData(null);
+                  await AsyncStorage.removeItem("token");
+                }
+
+                await AsyncStorage.removeItem("token");
+
+                while (router.canGoBack()) {
+                  router.back();
+                }
+                router.replace("/login");
+              }}
+            >
+              <Text
+                style={{ fontSize: 20, fontWeight: "bold", color: "white" }}
+              >
+                Verwijder Account
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{
+                backgroundColor: "teal",
+                borderRadius: 10,
+                padding: 10,
+                elevation: 2,
+                width: "90%",
+                height: 60,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => {
+                setDeletePopupVisible(false);
+              }}
+            >
+              <Text
+                style={{ fontSize: 20, fontWeight: "bold", color: "white" }}
+              >
+                Annuleren
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -117,11 +220,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
+    bottom: 80,
+    left: "5%",
+  },
+  logoutButtonText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+  },
+  deleteAccountButton: {
+    display: "flex",
+    backgroundColor: "red",
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+    width: "90%",
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
     bottom: 10,
     left: "5%",
   },
-
-  logoutButtonText: {
+  deleteAccountButtonText: {
     fontSize: 20,
     fontWeight: "bold",
     color: "white",

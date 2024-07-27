@@ -32,6 +32,31 @@ import { Colors, MapStyle } from "@/constants/Style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1); // deg2rad below
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+  return distance;
+};
+
+const deg2rad = (deg: number) => {
+  return deg * (Math.PI / 180);
+};
+
+
 export default function App() {
   const navigation = useNavigation();
 
@@ -85,29 +110,6 @@ export default function App() {
         let location = await Location.getCurrentPositionAsync({});
 
         if (currentRide) {
-          const calculateDistance = (
-            lat1: number,
-            lon1: number,
-            lat2: number,
-            lon2: number
-          ) => {
-            const R = 6371; // Radius of the earth in km
-            const dLat = deg2rad(lat2 - lat1); // deg2rad below
-            const dLon = deg2rad(lon2 - lon1);
-            const a =
-              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(deg2rad(lat1)) *
-                Math.cos(deg2rad(lat2)) *
-                Math.sin(dLon / 2) *
-                Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const distance = R * c; // Distance in km
-            return distance;
-          };
-
-          const deg2rad = (deg: number) => {
-            return deg * (Math.PI / 180);
-          };
 
           if (currentRide) {
             const oldLat = parseFloat(currentRide.last_latitude);
@@ -168,6 +170,22 @@ export default function App() {
   };
 
   const attemptReserve = async (marker: BikeData) => {
+    // make sure the distance is less than 100m
+    let location = await Location.getCurrentPositionAsync({});
+    const distance = calculateDistance(
+        location.coords.latitude,
+        location.coords.longitude,
+        parseFloat(marker.latitude),
+        parseFloat(marker.longitude)
+      );
+
+      if (distance > 0.05) {
+        Toast.show({
+          type: "error",
+          text1: "Je bent te ver weg van de fiets!",
+        });
+        return;
+      }
     try {
       const response = await authenticatedFetch(
         `${ServerInfo.url}/bikes/reserve/${marker.id}/`,
