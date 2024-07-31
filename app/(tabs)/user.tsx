@@ -76,9 +76,6 @@ export default function UserScreen() {
         Welkom, <Text style={{ color: "teal" }}>{userData?.username}</Text>
       </Text>
       <Text style={styles.d}>
-        Email: <Text style={{ color: "teal" }}>{userData?.email}</Text>
-      </Text>
-      <Text style={styles.d}>
         Referral code:{" "}
         <Text style={{ color: "teal" }}>{userData?.referral_code}</Text>
       </Text>
