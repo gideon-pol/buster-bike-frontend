@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import MapView, { Callout, Marker } from "react-native-maps";
+import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import {
   StyleSheet,
   View,
@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Platform,
 } from "react-native";
 
 import Toast from "react-native-toast-message";
@@ -226,6 +227,7 @@ export default function App() {
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         region={{
           latitude: 52.370216,
           longitude: 4.895168,

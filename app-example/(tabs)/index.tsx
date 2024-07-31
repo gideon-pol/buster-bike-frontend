@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import MapView, { Callout, Marker } from 'react-native-maps';
-import { StyleSheet, View, Text, Modal, Button, TouchableWithoutFeedback, Pressable, KeyboardAvoidingView, FlatList, TouchableOpacity, Image } from 'react-native';
+import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { StyleSheet, View, Text, Modal, Button, TouchableWithoutFeedback, Pressable, KeyboardAvoidingView, FlatList, TouchableOpacity, Image, Platform } from 'react-native';
 
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
@@ -119,6 +119,7 @@ export default function App() {
       <MapView 
         style={styles.map}
         showsUserLocation={true}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
