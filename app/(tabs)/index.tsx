@@ -274,6 +274,7 @@ export default function App() {
                     <View style={{ width: "50%", marginRight: 10 }}>
                       <View style={styles.rowView}>
                         <Text style={styles.modalTitle}>{modalData?.name}</Text>
+                      </View>
                         <FlatList
                           contentContainerStyle={{
                             flex: 1,
@@ -289,7 +290,6 @@ export default function App() {
                             />
                           )}
                         />
-                      </View>
 
                       {/* <Text style={styles.superText}>Code:</Text>
                       <Text style={styles.subText}>{modalData?.code}</Text> */}
