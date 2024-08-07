@@ -41,6 +41,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { DefaultStyle } from "@/constants/Style";
 import { Colors } from "@/constants/Style";
+import { formatDate } from "../../constants/Formatting";
 
 export default function TabTwoScreen() {
   const { currentRide, fetchCurrentRide, endCurrentRide } =
@@ -110,7 +111,7 @@ export default function TabTwoScreen() {
         <Periodic interval={1000}>
           {() => (
             <Text style={styles.subText}>
-              {currentRide?.bike.last_used_on?.toDateString() ?? "-"} -{" "}
+              {currentRide?.bike.last_used_on ? formatDate(currentRide?.bike.last_used_on) : "-"} -{" "}
               {formatTime(
                 Date.now() - (currentRide?.bike.last_used_on?.getTime() ?? 0)
               )}
@@ -284,7 +285,7 @@ export default function TabTwoScreen() {
                       <Text
                         style={[styles.endRideText, styles.endRideConfirmText]}
                       >
-                        Confirm
+                        Bevestig
                       </Text>
                     </Pressable>
                   </View>
