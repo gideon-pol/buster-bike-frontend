@@ -1,5 +1,6 @@
 import { ServerInfo } from "@/constants/Server";
 import { Colors, DefaultStyle } from "@/constants/Style";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import React, {
   TextInput,
   Pressable,
   StyleSheet,
+  ToastAndroid,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -19,6 +21,12 @@ export default function RegisterScreen() {
   const [referral, setReferral] = useState("");
 
   const navigation = useNavigation();
+
+  // State variable to track password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const register = async () => {
     console.log(
@@ -43,13 +51,15 @@ export default function RegisterScreen() {
     });
 
     if (response.status === 200) {
-      console.log("Registered successfully");
       const body = await response.json();
       await AsyncStorage.setItem("token", body["token"]);
-      console.log("Got token", body["token"]);
       navigation.navigate("index");
     } else {
-      console.log("Failed to register", response);
+      ToastAndroid.showWithGravity(
+        `Er is iets misgegaan, heb je de juiste referral code?`,
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM
+      );
     }
   };
 
@@ -74,13 +84,43 @@ export default function RegisterScreen() {
           onChangeText={setUsername}
         />
         <Text style={styles.info}>Wachtwoord</Text>
-        <TextInput
-          placeholder="Wachtwoord"
-          style={styles.input}
-          autoCapitalize="none"
-          secureTextEntry={true}
-          onChangeText={setPassword}
-        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            marginBottom: "1%",
+            marginLeft: "4%",
+          }}
+        >
+          <TextInput
+            placeholder="Wachtwoord"
+            style={styles.input}
+            autoCapitalize="none"
+            secureTextEntry={!showPassword}
+            onChangeText={setPassword}
+          />
+          <Pressable
+            style={{
+              borderRadius: 10,
+              width: "100%",
+              height: 60,
+              justifyContent: "center",
+              marginLeft: "-9%",
+              marginBottom: "2%",
+            }}
+            onPress={toggleShowPassword}
+          >
+            <MaterialCommunityIcons
+              name={showPassword ? "eye-off" : "eye"}
+              size={40}
+              style={{
+                color: Colors.accent,
+                fontSize: 25,
+              }}
+            />
+          </Pressable>
+        </View>
         <Pressable style={styles.button} onPress={register}>
           <Text style={styles.buttonText}>Registreer</Text>
         </Pressable>

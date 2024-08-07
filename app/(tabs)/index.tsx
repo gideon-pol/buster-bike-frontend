@@ -304,7 +304,6 @@ export default function App() {
             }}
             pinColor={getPinColor(marker)}
             onPress={() => {
-              console.log("pressed");
               setModalVisible(marker);
             }}
           />
