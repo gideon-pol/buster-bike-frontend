@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function Periodic({ children, interval }) {
   const [time, setTime] = useState(new Date());

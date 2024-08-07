@@ -1,29 +1,16 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   StyleSheet,
-  Image,
-  Platform,
   View,
   Text,
   Pressable,
   TouchableWithoutFeedback,
   Modal,
-  BackHandler,
 } from "react-native";
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 import {
   useContext,
   useEffect,
   useState,
-  createContext,
-  useCallback,
   useRef,
 } from "react";
 
@@ -34,7 +21,6 @@ import Capability from "@/components/Capability";
 import { BikeState } from "@/constants/Types";
 
 import {
-  Gesture,
   GestureHandlerRootView,
   TextInput,
 } from "react-native-gesture-handler";

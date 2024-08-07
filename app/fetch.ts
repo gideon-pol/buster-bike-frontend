@@ -1,4 +1,3 @@
-import { ServerInfo } from "@/constants/Server";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // export const authenticatedFetch: (url: string, options: any) => Promise<Response> = async (url, options = {}) => {

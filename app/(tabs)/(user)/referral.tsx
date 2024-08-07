@@ -1,6 +1,6 @@
 import { ServerInfo } from "@/constants/Server";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable, Button, ScrollView, ToastAndroid } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, ToastAndroid } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authenticatedFetch } from "@/app/fetch";
 import { Colors, DefaultStyle } from "@/constants/Style";
@@ -56,7 +56,11 @@ export default function ReferralScreen() {
     if (response.status === 201) {
       fetchReferrals();
     } else {
-      console.error("Failed to create referral");
+      ToastAndroid.showWithGravity(
+        `Er ging iets fout`,
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM
+      );
     }
   }
 

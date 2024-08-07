@@ -1,6 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Icon } from '@expo/vector-icons/build/createIconSet';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleProp, TextStyle } from 'react-native';
 
 function Capability({ type, state, style, onPress }: { type: string, state: number, style?: StyleProp<TextStyle>, onPress?: () => void }) {

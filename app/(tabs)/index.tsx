@@ -1,20 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
-import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import {
   StyleSheet,
   View,
   Text,
   Modal,
-  Button,
   TouchableWithoutFeedback,
   Pressable,
-  KeyboardAvoidingView,
   FlatList,
-  TouchableOpacity,
   Image,
-  Dimensions,
   Platform,
-  ToastAndroid,
 } from "react-native";
 
 import Toast from "react-native-toast-message";
@@ -66,7 +61,7 @@ export default function App() {
     undefined
   );
   const [markers, setMarkers] = useState<BikeData[]>([]);
-  const { currentRide, fetchCurrentRide, endCurrentRide } =
+  const { currentRide, fetchCurrentRide } =
     useContext(RideContext);
 
   // const [bStatus, requestPermission] = Location.useBackgroundPermissions();
@@ -183,7 +178,7 @@ export default function App() {
       setMarkers(items);
 
       setModalVisible((modalData) => {
-        const newData = items.find((x) => x.id == modalData?.id);
+        const newData = items.find((x) => x.id === modalData?.id);
         if (newData && modalData) {
           return newData;
         } else {

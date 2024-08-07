@@ -1,7 +1,5 @@
-import { ServerInfo } from '@/constants/Server';
-import Constants from 'expo-constants';
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Linking, Platform } from 'react-native';
+import React from 'react';
+import { Text, StyleSheet, Linking, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 

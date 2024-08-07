@@ -13,7 +13,6 @@ import React, {
   ToastAndroid,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState("");
