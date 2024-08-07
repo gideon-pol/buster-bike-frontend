@@ -368,7 +368,7 @@ export default function App() {
                     <View style={{ flex: 1 }}>
                       <Image
                         source={{
-                          uri: `${ServerInfo.url}/bikes/image/${modalData?.id}`,
+                          uri: `${ServerInfo.url}/static/bikes/images/${modalData?.id}.png`,
                         }}
                         style={{
                           width: "100%",

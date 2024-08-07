@@ -21,7 +21,7 @@ export default function DisclaimerScreen() {
   return (
     <SafeAreaView style={DefaultStyle.view}>
       <View style={styles.padding} />
-      <Text style={styles.title}>Buster Bike</Text>
+      <Text style={DefaultStyle.viewTitle}>Buster Bike</Text>
       <View
         style={{
           marginLeft: "5%",
@@ -30,31 +30,28 @@ export default function DisclaimerScreen() {
           flex: 1,
         }}
       >
-        <Text style={styles.info}>Een paar dingen voor je kan beginnen:</Text>
+        <Text style={styles.info}>Enkele dingen voordat je kunt beginnen:</Text>
         <Text style={styles.info}>
-          • De app is gebouwd op het vertrouwen van de gebruikers, zorg er voor
-          dat je altijd netjes aangeeft waar je de fiets achter laat in de app.
+          • De app is gebouwd op het vertrouwen van de gebruikers. Zorg er daarom voor 
+          dat je altijd netjes aangeeft waar je de fiets achterlaat in de app.
         </Text>
         <Text style={styles.info}>
-          • De fiets zal altijd een roze slot hebben, zo zijn ze makkelijk te
-          herkennen.
+          • De fiets heeft altijd een roze slot, zodat ze makkelijk te herkennen zijn.
         </Text>
         <Text style={styles.info}>
-          • Zet die fiets altijd goed op slot (ergens aan vast of door een
-          wiel), en op een plek waar hij niet weggehaald. Dus in een vak, rek of
-          stalling.
+          • Zet de fiets altijd goed op slot (ergens aan vast of door een wiel), en op een plek 
+          waar hij niet kan worden weggehaald. Dus in een vak, rek of stalling.
         </Text>
         <Text style={styles.info}>
-          • Buster Bike is niet verantwoordelijk voor schade of letsel dat
-          voortkomt uit het gebruik van deze app. De fietsen zijn vaak niet in
-          de beste staat, dus zorg er voor dat je goed oplet of bijvoorbeeld de
-          remmen het doen.
+          • Buster Bike is niet verantwoordelijk voor schade of letsel dat voortkomt uit het 
+          gebruik van deze app. De fietsen zijn vaak niet in de beste staat, dus zorg ervoor 
+          dat je goed oplet, bijvoorbeeld of de remmen werken.
         </Text>
         <Text style={styles.info}>
           • Gebruik deze app niet tijdens het fietsen (want boete).
         </Text>
         <Text style={styles.info}>
-          • Je kan het slot makkelijk over je stuur hangen om het mee te nemen.
+          • Je kunt het slot makkelijk over je stuur hangen om het mee te nemen.
         </Text>
         <TouchableOpacity
           style={styles.button}
@@ -77,12 +74,6 @@ const styles = StyleSheet.create({
   },
   padding: {
     height: 50,
-  },
-  title: {
-    fontSize: 50,
-    fontWeight: "bold",
-    margin: "2%",
-    color: Colors.accent,
   },
   button: {
     backgroundColor: Colors.accent,

@@ -123,12 +123,11 @@ export default function UserScreen() {
         </Text>
       </Text>
       
-      <View style={{ padding: 10 }}>
-        {/* Your content here */}
-      </View>
-
       <View style={{ ...styles.d, alignItems: "flex-start",flexDirection: "row" }}>
-        <Switch value={markerColorSettingEnabled} onValueChange={toggleSetting} />
+        <Switch value={markerColorSettingEnabled} onValueChange={toggleSetting} 
+          thumbColor={markerColorSettingEnabled ? Colors.accent : Colors.text}
+          trackColor={{ false: "gray" }}
+        />
         <Text style={{...styles.d, marginLeft: 10 }}>
         Markerkleuren voor duur van niet-gebruikte fiets.</Text>
       </View>
