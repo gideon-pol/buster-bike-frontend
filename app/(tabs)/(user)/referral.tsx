@@ -6,6 +6,7 @@ import { authenticatedFetch } from "@/app/fetch";
 import { Colors, DefaultStyle } from "@/constants/Style";
 import * as Clipboard from "expo-clipboard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { formatDate } from "@/constants/Formatting";
 
 type Referral = {
   code: string,
@@ -85,7 +86,7 @@ export default function ReferralScreen() {
                 </Text>
                 <Text style={{ color: Colors.text }}>{referral.referrer}</Text>
                 <Text style={{ color: Colors.text }}>{referral.referred}</Text>
-                <Text style={{ color: Colors.text }}>{referral.created_at.toDateString()}</Text>
+                <Text style={{ color: Colors.text }}>{formatDate(referral.created_at)}</Text>
               </View>
             );
           })

@@ -7,6 +7,7 @@ import { ServerInfo } from "@/constants/Server";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useNavigation } from "expo-router";
 import { Switch } from "react-native";
+import { formatDate } from "@/constants/Formatting";
 
 type UserData = {
   id?: string;
@@ -114,11 +115,7 @@ export default function UserScreen() {
         Lid sinds:{" "}
         <Text style={{ color: Colors.accent }}>
           {userData && userData.created_at
-            ? new Date(userData?.created_at).toLocaleDateString("nl-NL", {
-              year: "numeric",
-              month: "short",
-              day: "2-digit",
-            })
+            ? formatDate(new Date(userData?.created_at))
             : ""}
         </Text>
       </Text>

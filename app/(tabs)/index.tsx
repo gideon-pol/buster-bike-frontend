@@ -33,6 +33,7 @@ import { useNavigation } from "expo-router";
 import { Colors, MapStyle } from "@/constants/Style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import { formatDate } from "@/constants/Formatting";
 
 const calculateDistance = (
   lat1: number,
@@ -358,7 +359,7 @@ export default function App() {
                       </Text>
                       <Text style={styles.subText}>
                         {modalData?.last_used_by ?? "-"} :{" "}
-                        {modalData?.last_used_on?.toDateString() ?? "-"}
+                        {modalData?.last_used_on ? formatDate(modalData?.last_used_on) : "-"}
                       </Text>
                       <Text style={styles.superText}>
                         Totale afstand gereden:
