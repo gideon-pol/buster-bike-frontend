@@ -17,6 +17,17 @@ export default function LoginScreen() {
 
   useEffect(() => {
     const checkToken = async () => {
+      const accepted = await AsyncStorage.getItem("disclaimerAccepted");
+      if (!accepted) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "(tabs)" }, { name: "disclaimer" }],
+        });
+        navigation.navigate("disclaimer");
+        setAppIsReady(true);
+        return;
+      }
+      
       const token = await AsyncStorage.getItem("token");
       if (token) {
         navigation.reset({
