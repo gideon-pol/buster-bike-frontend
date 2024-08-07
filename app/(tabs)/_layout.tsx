@@ -75,7 +75,7 @@ export default function TabLayout() {
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
           headerShown: false,
-          tabBarActiveBackgroundColor: "teal",
+          tabBarActiveBackgroundColor: Colors.accent,
           tabBarInactiveBackgroundColor: "black",
           tabBarItemStyle: {
             borderRadius: 5,
@@ -107,7 +107,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="user"
+          name="(user)"
           options={{
             title: "User",
             tabBarIcon: ({ color, focused }) => (

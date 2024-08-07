@@ -130,12 +130,12 @@ const styles = StyleSheet.create({
   },
 
   info: {
-    color: "teal",
+    color: Colors.accent,
     fontSize: 15,
     marginLeft: "10%",
     width: "80%",
     marginBottom: "1%",
-    borderBottomColor: "teal",
+    borderBottomColor: Colors.accent,
     borderBottomWidth: 2,
   },
 });

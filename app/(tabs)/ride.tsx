@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     margin: "2%",
     marginLeft: "5%",
-    color: "teal",
+    color: Colors.accent,
   },
 
   subText: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
 
   endRideButton: {
     display: "flex",
-    backgroundColor: "teal",
+    backgroundColor: Colors.accent,
     borderRadius: 10,
     padding: 10,
     elevation: 2,

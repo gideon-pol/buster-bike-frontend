@@ -14,6 +14,7 @@ import {
   Image,
   Dimensions,
   Platform,
+  ToastAndroid,
 } from "react-native";
 
 import Toast from "react-native-toast-message";
@@ -183,6 +184,8 @@ export default function App() {
         type: "error",
         text1: "Je bent te ver weg van de fiets!",
       });
+
+      // ToastAndroid.showWithGravity("Je bent te ver weg van de fiets!", ToastAndroid.LONG, ToastAndroid.CENTER);
       return;
     }
     try {
@@ -201,12 +204,20 @@ export default function App() {
           text1: `Fiets ${marker.name} gereserveerd!`,
         });
 
+        // ToastAndroid.showWithGravity(`Fiets ${marker.name} gereserveerd!`, ToastAndroid.LONG, ToastAndroid.TOP);
+
         fetchCurrentRide();
       } else {
         Toast.show({
           type: "error",
           text1: `Fiets ${marker.name} kon niet gereserveerd worden!`,
         });
+
+        // ToastAndroid.showWithGravity(
+        //   `Fiets ${marker.name} kon niet gereserveerd worden!`,
+        //   ToastAndroid.LONG,
+        //   ToastAndroid.TOP
+        // );
         // console.error('Error reserving bike:', response.statusText, await response.text());
       }
     } catch (error) {
@@ -244,7 +255,7 @@ export default function App() {
               latitude: parseFloat(marker.latitude),
               longitude: parseFloat(marker.longitude),
             }}
-            pinColor={marker.is_in_use ? "purple" : "teal"}
+            pinColor={marker.is_in_use ? "purple" : Colors.accent}
             onPress={() => {
               console.log("pressed");
               setModalVisible(marker);
@@ -380,8 +391,10 @@ export default function App() {
         <View style={styles.smallWindow}>
           <TouchableWithoutFeedback onPress={() => navigation.navigate("ride")}>
           <View>
-            <Text style={styles.subText}>Huidige rit:</Text>
-            <Text style={styles.subText}>{currentRide.bike.name}</Text>
+            <Text style={styles.boldText}>
+              Huidige rit:{" "}
+              <Text style={[styles.boldText, {color: Colors.accent}]}>{currentRide.bike.name}</Text>
+            </Text>
           </View>
           </TouchableWithoutFeedback>
         </View>
@@ -392,18 +405,16 @@ export default function App() {
 
 const styles = StyleSheet.create({
   smallWindow: {
+    display: "flex",
     position: "absolute",
-    top: "88%",
-    left: "67%",
-    width: "30%",
-    height: "10%",
-    backgroundColor: Colors.accent,
+    right: "0%",
+    bottom: "0%",
+    padding: 10,
+    margin: 5,
+    backgroundColor: Colors.primary,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-  },
-  container: {
-    flex: 1,
   },
   map: {
     width: "100%",
@@ -456,7 +467,7 @@ const styles = StyleSheet.create({
   },
 
   closeButton: {
-    backgroundColor: "teal",
+    backgroundColor: Colors.accent,
     borderRadius: 10,
     padding: 10,
     elevation: 2,
@@ -466,8 +477,14 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
 
+  boldText: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: Colors.text,
+  },
+
   superText: {
-    color: "teal",
+    color: Colors.accent,
   },
   subText: {
     fontWeight: "bold",
@@ -479,7 +496,7 @@ const styles = StyleSheet.create({
   reserveButtonBase: {
     width: "100%",
     height: 60,
-    backgroundColor: "teal",
+    backgroundColor: Colors.accent,
     padding: 10,
     borderRadius: 10,
     alignItems: "center",

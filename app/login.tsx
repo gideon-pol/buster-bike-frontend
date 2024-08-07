@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     marginLeft: "10%",
     width: "80%",
     marginBottom: "1%",
-    borderBottomColor: "teal",
+    borderBottomColor: Colors.accent,
     borderBottomWidth: 2,
   },
 });

@@ -47,7 +47,8 @@
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.10",
     "expo-build-properties": "~0.12.3",
-    "expo-updates": "~0.25.21"
+    "expo-updates": "~0.25.21",
+    "expo-clipboard": "~6.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

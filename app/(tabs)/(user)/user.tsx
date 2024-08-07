@@ -1,8 +1,8 @@
 import { Colors, DefaultStyle } from "@/constants/Style";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
+import { View, Text, StyleSheet, Pressable, Modal, Button } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { authenticatedFetch } from "../fetch";
+import { authenticatedFetch } from "@/app/fetch";
 import { ServerInfo } from "@/constants/Server";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useNavigation } from "expo-router";
@@ -13,8 +13,9 @@ type UserData = {
   first_name: string;
   last_name?: string;
   email?: string;
-  referral_code?: string;
-  referrer?: string;
+  // referral_code?: string;
+  referrer: string;
+  can_refer: boolean,
   created_at?: string;
   updated_at?: string;
 };
@@ -73,27 +74,32 @@ export default function UserScreen() {
   return (
     <SafeAreaView style={DefaultStyle.view}>
       <Text style={DefaultStyle.viewTitle}>
-        Welkom, <Text style={{ color: "teal" }}>{userData?.username}</Text>
+        Welkom, <Text style={{ color: Colors.accent }}>{userData?.username}</Text>
       </Text>
-      <Text style={styles.d}>
+      {/* <Text style={styles.d}>
         Referral code:{" "}
-        <Text style={{ color: "teal" }}>{userData?.referral_code}</Text>
-      </Text>
+        <Text style={{ color: Colors.accent }}>{userData?.referral_code}</Text>
+      </Text> */}
       <Text style={styles.d}>
-        Referrer: <Text style={{ color: "teal" }}>{userData?.referrer}</Text>
+        Referrer: <Text style={{ color: Colors.accent }}>{userData?.referrer}</Text>
       </Text>
       <Text style={styles.d}>
         Lid sinds:{" "}
-        <Text style={{ color: "teal" }}>
+        <Text style={{ color: Colors.accent }}>
           {userData && userData.created_at
             ? new Date(userData?.created_at).toLocaleDateString("nl-NL", {
-                year: "numeric",
-                month: "short",
-                day: "2-digit",
-              })
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+            })
             : ""}
         </Text>
       </Text>
+      {
+        userData?.can_refer && (
+          <Button title="Referrals" onPress={() => navigation.navigate("referral")} />
+        )
+      }
 
       <Pressable style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Uitloggen</Text>
@@ -172,7 +178,7 @@ export default function UserScreen() {
             </Pressable>
             <Pressable
               style={{
-                backgroundColor: "teal",
+                backgroundColor: Colors.accent,
                 borderRadius: 10,
                 padding: 10,
                 elevation: 2,
@@ -208,7 +214,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     display: "flex",
-    backgroundColor: "teal",
+    backgroundColor: Colors.accent,
     borderRadius: 10,
     padding: 10,
     elevation: 2,
