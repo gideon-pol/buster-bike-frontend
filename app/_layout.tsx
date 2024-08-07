@@ -39,6 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="location" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
+        <Stack.Screen name="disclaimer" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

@@ -6,6 +6,7 @@ import { authenticatedFetch } from "@/app/fetch";
 import { ServerInfo } from "@/constants/Server";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useNavigation } from "expo-router";
+import { Switch } from "react-native";
 
 type UserData = {
   id?: string;
@@ -23,6 +24,32 @@ type UserData = {
 export default function UserScreen() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const navigation = useNavigation();
+
+  const [markerColorSettingEnabled, setMarkerColorSettingEnabled] = useState(false);
+
+
+  useEffect(() => {
+    const getMarkerColorSetting = async () => {
+      try {
+        const value = await AsyncStorage.getItem("markerColorSetting");
+        if (value !== null) {
+          setMarkerColorSettingEnabled(value === "true");
+        } else {
+          AsyncStorage.setItem("markerColorSetting", "false");
+        }
+      } catch (error) {
+        console.error("Error retrieving marker color setting:", error);
+      }
+    };
+
+    getMarkerColorSetting();
+  }, []);
+
+
+  const toggleSetting = async (value: boolean) => {
+    setMarkerColorSettingEnabled(value);
+    await AsyncStorage.setItem("markerColorSetting", value? "true" : "false");
+  };
 
   const fetchUserData = async () => {
     const response = await authenticatedFetch(`${ServerInfo.url}/users/me`);
@@ -95,6 +122,17 @@ export default function UserScreen() {
             : ""}
         </Text>
       </Text>
+      
+      <View style={{ padding: 10 }}>
+        {/* Your content here */}
+      </View>
+
+      <View style={{ ...styles.d, alignItems: "flex-start",flexDirection: "row" }}>
+        <Switch value={markerColorSettingEnabled} onValueChange={toggleSetting} />
+        <Text style={{...styles.d, marginLeft: 10 }}>
+        Markerkleuren voor duur van niet-gebruikte fiets.</Text>
+      </View>
+
       {
         userData?.can_refer && (
           <Button title="Referrals" onPress={() => navigation.navigate("referral")} />

@@ -72,6 +72,31 @@ export default function App() {
 
   const [locationBlocked, setLocationBlocked] = useState(false);
 
+  const [markerColorSetting, setMarkerColorSetting] = useState<boolean>(false);
+
+  useEffect(() => {
+    const getMarkerColorSetting = async () => {
+      try {
+        const value = await AsyncStorage.getItem("markerColorSetting");
+        if (value !== null) {
+          setMarkerColorSetting(value === "true");
+        } else {
+          AsyncStorage.setItem("markerColorSetting", "false");
+        }
+      } catch (error) {
+        console.error("Error retrieving marker color setting:", error);
+      }
+    };
+
+    const interval = setInterval(() => {
+    getMarkerColorSetting();
+  }, 5000);
+  return () => {
+    clearInterval(interval);
+  };
+
+  }, []);
+
   useEffect(() => {
     fetchCurrentRide();
     const interval = setInterval(() => {
@@ -225,6 +250,27 @@ export default function App() {
     }
   };
 
+  const getPinColor = (marker: BikeData): string => {
+    if (markerColorSetting) {
+      if (marker.last_used_on === null) {
+        return "purple";
+      }
+      const not_used_for = new Date().getTime() - marker.last_used_on.getTime();
+      // red for 1 month
+      if (not_used_for > 1000 * 60 * 60 * 24 * 30) {
+        return "red";
+        // orange for 2 weeks
+      } else if (not_used_for > 1000 * 60 * 60 * 24 * 14) {
+        return "orange";
+        // teal for the rest
+      } else {
+        return "teal";
+      }
+    } else {
+      return "teal";
+    }
+  };
+
   useEffect(() => {
     fetchMarkers();
   }, [currentRide]);
@@ -238,7 +284,7 @@ export default function App() {
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
         region={{
           latitude: 52.370216,
           longitude: 4.895168,
@@ -250,12 +296,12 @@ export default function App() {
       >
         {markers.map((marker, index) => (
           <Marker
-            key={marker.id + marker.is_in_use}
+            key={marker.id + marker.is_in_use + getPinColor(marker)}
             coordinate={{
               latitude: parseFloat(marker.latitude),
               longitude: parseFloat(marker.longitude),
             }}
-            pinColor={marker.is_in_use ? "purple" : Colors.accent}
+            pinColor={getPinColor(marker)}
             onPress={() => {
               console.log("pressed");
               setModalVisible(marker);
@@ -288,21 +334,21 @@ export default function App() {
                       <View style={styles.rowView}>
                         <Text style={styles.modalTitle}>{modalData?.name}</Text>
                       </View>
-                        <FlatList
-                          contentContainerStyle={{
-                            flex: 1,
-                            alignItems: "center",
-                          }}
-                          horizontal={true}
-                          data={["tires", "light", "gears", "carrier", "crate"]}
-                          renderItem={({ item }) => (
-                            <Capability
-                              type={item}
-                              state={modalData.capabilities[item]}
-                              style={styles.bikeIcon}
-                            />
-                          )}
-                        />
+                      <FlatList
+                        contentContainerStyle={{
+                          flex: 1,
+                          alignItems: "center",
+                        }}
+                        horizontal={true}
+                        data={["tires", "light", "gears", "carrier", "crate"]}
+                        renderItem={({ item }) => (
+                          <Capability
+                            type={item}
+                            state={modalData.capabilities[item]}
+                            style={styles.bikeIcon}
+                          />
+                        )}
+                      />
 
                       {/* <Text style={styles.superText}>Code:</Text>
                       <Text style={styles.subText}>{modalData?.code}</Text> */}
