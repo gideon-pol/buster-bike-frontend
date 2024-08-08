@@ -54,27 +54,3 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 });
-
-export default function Notification(
-    { text }: Props) {
-
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            // Destroy the notification here
-        }, 5000);
-
-        return () => clearTimeout(timer);
-    }, []);
-
-    return (
-        <Modal
-            animationType='slide'
-            transparent={true}
-        >
-            <View style={styles.notificationView}>
-                <Text style={styles.notificationTitle}>Notificatie</Text>
-                <Text>{text}</Text>
-            </View>
-        </Modal>
-    );
-}

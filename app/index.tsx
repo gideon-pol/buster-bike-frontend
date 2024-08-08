@@ -1,9 +1,7 @@
-import { ServerInfo } from "@/constants/Server";
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable } from "react-native";
+import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { authenticatedFetch } from "@/app/fetch";
 import { useNavigation } from "expo-router";
 import { Colors, DefaultStyle } from "@/constants/Style";
 import * as SplashScreen from "expo-splash-screen";

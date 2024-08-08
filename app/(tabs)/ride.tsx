@@ -1,29 +1,16 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   StyleSheet,
-  Image,
-  Platform,
   View,
   Text,
   Pressable,
   TouchableWithoutFeedback,
   Modal,
-  BackHandler,
 } from "react-native";
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 import {
   useContext,
   useEffect,
   useState,
-  createContext,
-  useCallback,
   useRef,
 } from "react";
 
@@ -34,13 +21,13 @@ import Capability from "@/components/Capability";
 import { BikeState } from "@/constants/Types";
 
 import {
-  Gesture,
   GestureHandlerRootView,
   TextInput,
 } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 import { DefaultStyle } from "@/constants/Style";
 import { Colors } from "@/constants/Style";
+import { formatDate } from "../../constants/Formatting";
 
 export default function TabTwoScreen() {
   const { currentRide, fetchCurrentRide, endCurrentRide } =
@@ -110,7 +97,7 @@ export default function TabTwoScreen() {
         <Periodic interval={1000}>
           {() => (
             <Text style={styles.subText}>
-              {currentRide?.bike.last_used_on?.toDateString() ?? "-"} -{" "}
+              {currentRide?.bike.last_used_on ? formatDate(currentRide?.bike.last_used_on) : "-"} -{" "}
               {formatTime(
                 Date.now() - (currentRide?.bike.last_used_on?.getTime() ?? 0)
               )}
@@ -284,7 +271,7 @@ export default function TabTwoScreen() {
                       <Text
                         style={[styles.endRideText, styles.endRideConfirmText]}
                       >
-                        Confirm
+                        Bevestig
                       </Text>
                     </Pressable>
                   </View>

@@ -1,17 +1,31 @@
 import { ServerInfo } from "@/constants/Server";
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  ToastAndroid,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authenticatedFetch } from "@/app/fetch";
 import { useNavigation } from "expo-router";
 import { Colors, DefaultStyle } from "@/constants/Style";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  // State variable to track password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const gotoMainScreen = () => {
     navigation.reset({
@@ -22,7 +36,6 @@ export default function LoginScreen() {
   };
 
   const attemptLogin = async () => {
-    console.log("Attempting login");
     const response = await authenticatedFetch(
       `${ServerInfo.url}/users/login/`,
       {
@@ -40,11 +53,14 @@ export default function LoginScreen() {
     if (response.ok) {
       const body = await response.json();
       await AsyncStorage.setItem("token", body["token"]);
-      console.log("Got token", body["token"]);
       gotoMainScreen();
       // navigation.navigate('(tabs)');
     } else {
-      console.log("Login failed", response.body);
+      ToastAndroid.showWithGravity(
+        `Inloggegevens onjuist`,
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM
+      );
     }
   };
 
@@ -62,13 +78,44 @@ export default function LoginScreen() {
           onChangeText={setUsername}
         />
         <Text style={styles.info}>Wachtwoord</Text>
-        <TextInput
-          placeholder="Wachtwoord"
-          style={styles.input}
-          autoCapitalize="none"
-          secureTextEntry={true}
-          onChangeText={setPassword}
-        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            marginBottom: "1%",
+            marginLeft: "4%",
+          }}
+        >
+          <TextInput
+            placeholder="Wachtwoord"
+            style={styles.input}
+            autoCapitalize="none"
+            secureTextEntry={!showPassword}
+            onChangeText={setPassword}
+          />
+          <Pressable
+            style={{
+              borderRadius: 10,
+              width: "100%",
+              height: 60,
+              justifyContent: "center",
+              marginLeft: "-9%",
+              marginBottom: "2%",
+            }}
+            onPress={toggleShowPassword}
+          >
+            <MaterialCommunityIcons
+              name={showPassword ? "eye-off" : "eye"}
+              size={40}
+              style={{
+                color: Colors.accent,
+                fontSize: 25,
+              }}
+            />
+          </Pressable>
+        </View>
+
         <Pressable style={styles.button} onPress={attemptLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </Pressable>
