@@ -193,7 +193,7 @@ export default function TabTwoScreen() {
                           [
                             "Versnellingen missen",
                             "Versnellingen zijn kapot",
-                            "Versnellingen werken half",
+                            "Versnellingen werken slecht",
                             "Versnellingen werken",
                           ][bikeCapabilities?.gears]
                         }
@@ -257,7 +257,7 @@ export default function TabTwoScreen() {
                         onBlur={() => setModalUp(false)}
                         onChangeText={(e) => (currentRide.bike.notes = e)}
                       >
-                        {currentRide?.notes}
+                        {currentRide?.bike.notes}
                       </TextInput>
                     </View>
 
