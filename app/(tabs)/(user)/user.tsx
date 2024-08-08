@@ -120,7 +120,7 @@ export default function UserScreen() {
         </Text>
       </Text>
       
-      <View style={{ ...styles.d, alignItems: "flex-start",flexDirection: "row" }}>
+      <View style={{ ...styles.d, alignItems: "flex-start", flexDirection: "row" }}>
         <Switch value={markerColorSettingEnabled} onValueChange={toggleSetting} 
           thumbColor={markerColorSettingEnabled ? Colors.accent : Colors.text}
           trackColor={{ false: "gray" }}

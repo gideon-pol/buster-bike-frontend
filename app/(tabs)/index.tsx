@@ -206,12 +206,12 @@ export default function App() {
     );
 
     if (distance > 0.05) {
-      Toast.show({
-        type: "error",
-        text1: "Je bent te ver weg van de fiets!",
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Je bent te ver weg van de fiets!",
+      // });
 
-      // ToastAndroid.showWithGravity("Je bent te ver weg van de fiets!", ToastAndroid.LONG, ToastAndroid.CENTER);
+      ToastAndroid.showWithGravity("Je bent te ver weg van de fiets!", ToastAndroid.LONG, ToastAndroid.CENTER);
       return;
     }
     try {
@@ -225,25 +225,25 @@ export default function App() {
       if (response.ok) {
         setModalVisible(undefined);
 
-        Toast.show({
-          type: "success",
-          text1: `Fiets ${marker.name} gereserveerd!`,
-        });
+        // Toast.show({
+        //   type: "success",
+        //   text1: `Fiets ${marker.name} gereserveerd!`,
+        // });
 
-        // ToastAndroid.showWithGravity(`Fiets ${marker.name} gereserveerd!`, ToastAndroid.LONG, ToastAndroid.TOP);
+        ToastAndroid.showWithGravity(`Fiets ${marker.name} gereserveerd!`, ToastAndroid.LONG, ToastAndroid.TOP);
 
         fetchCurrentRide();
       } else {
-        Toast.show({
-          type: "error",
-          text1: `Fiets ${marker.name} kon niet gereserveerd worden!`,
-        });
+        // Toast.show({
+        //   type: "error",
+        //   text1: `Fiets ${marker.name} kon niet gereserveerd worden!`,
+        // });
 
-        // ToastAndroid.showWithGravity(
-        //   `Fiets ${marker.name} kon niet gereserveerd worden!`,
-        //   ToastAndroid.LONG,
-        //   ToastAndroid.TOP
-        // );
+        ToastAndroid.showWithGravity(
+          `Fiets ${marker.name} kon niet gereserveerd worden!`,
+          ToastAndroid.LONG,
+          ToastAndroid.TOP
+        );
         // console.error('Error reserving bike:', response.statusText, await response.text());
       }
     } catch (error) {
