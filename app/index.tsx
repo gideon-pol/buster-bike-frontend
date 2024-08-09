@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
 import { Colors, DefaultStyle } from "@/constants/Style";
 import * as SplashScreen from "expo-splash-screen";
+import * as Location from "expo-location";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,6 +14,8 @@ export default function LoginScreen() {
 
   const [appIsReady, setAppIsReady] = useState(false);
 
+
+  
   useEffect(() => {
     const checkToken = async () => {
       const accepted = await AsyncStorage.getItem("disclaimerAccepted");
@@ -45,6 +48,19 @@ export default function LoginScreen() {
     };
 
     checkToken();
+
+    const askPermissions = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "location" }],
+        });
+        navigation.navigate("location");  
+      }
+    }
+
+    askPermissions();
   }, [navigation]);
 
   const onLayoutRootView = useCallback(async () => {

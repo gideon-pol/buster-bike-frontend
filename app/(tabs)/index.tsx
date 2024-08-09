@@ -13,8 +13,6 @@ import {
   ToastAndroid,
 } from "react-native";
 
-import Toast from "react-native-toast-message";
-
 import * as Location from "expo-location";
 
 import RideContext from "@/hooks/RideProvider";
@@ -120,17 +118,20 @@ export default function App() {
 
     const interval = setInterval(() => {
       (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        // let bStatus = await Location.requestBackgroundPermissionsAsync();
+        let location: Location.LocationObject;
+        try{
+          location = await Location.getCurrentPositionAsync({});
 
-        if (status !== "granted") {
-          // if(!bStatus?.granted){
+        } catch (error) {
           setLocationBlocked(true);
           goToLocationBlockScreen();
           return;
         }
-
-        let location = await Location.getCurrentPositionAsync({});
+        if (location.mocked) {
+          setLocationBlocked(true);
+          goToLocationBlockScreen();
+          return;
+        }
 
         if (currentRide) {
           if (currentRide) {
@@ -429,7 +430,6 @@ export default function App() {
           </TouchableWithoutFeedback>
         </View>
       </Modal> */}
-      <Toast />
       {currentRide && (
         <View style={styles.smallWindow}>
           <TouchableWithoutFeedback onPress={() => navigation.navigate("ride")}>
