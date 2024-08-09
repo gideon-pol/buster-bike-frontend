@@ -1,6 +1,5 @@
 export type RideData = {
   bike: BikeData;
-
   last_longitude: string;
   last_latitude: string;
   total_distance: number;
@@ -25,5 +24,6 @@ export type BikeData = {
   last_used_by: string | null,
   last_used_on: Date | null,
   capabilities: BikeState;
+  total_distance: number;
   notes: string;
 };

@@ -11,6 +11,7 @@ import {
   Image,
   ToastAndroid,
   Platform,
+  ToastAndroid,
 } from "react-native";
 
 import * as Location from "expo-location";
@@ -360,7 +361,8 @@ export default function App() {
                       <Text style={styles.superText}>
                         Totale afstand gereden:
                       </Text>
-                      <Text style={styles.subText}>10km</Text>
+                      <Text style={styles.subText}>{modalData?.total_distance.toFixed(1)}km</Text>
+                        {/* {typeof modalData?.total_distance === 'number' ? modalData.total_distance.toFixed(2) : '-'} km */}
                     </View>
                     <View style={{ flex: 1 }}>
                       <Image

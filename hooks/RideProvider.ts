@@ -1,5 +1,5 @@
 // import { MarkerData } from '@/app/(tabs)';
-import { RideData } from '@/app/(tabs)';
+import { RideData } from '@/constants/Types';
 import { createContext } from 'react';
 
 const RideContext = createContext({
