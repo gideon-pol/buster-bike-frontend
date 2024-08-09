@@ -9,7 +9,6 @@ import {
   Pressable,
   FlatList,
   Image,
-  ToastAndroid,
   Platform,
   ToastAndroid,
 } from "react-native";
