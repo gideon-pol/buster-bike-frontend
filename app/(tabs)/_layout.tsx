@@ -50,6 +50,11 @@ export default function TabLayout() {
 
     currentRide.bike.latitude = currentRide.last_latitude;
     currentRide.bike.longitude = currentRide.last_longitude;
+    
+    const data = {
+      ...currentRide.bike,
+      driven_distance: currentRide.total_distance.toFixed(2),
+    }
 
     const response = await authenticatedFetch(
       `${ServerInfo.url}/users/reserved/end/`,
@@ -58,7 +63,7 @@ export default function TabLayout() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(currentRide.bike),
+        body: JSON.stringify(data),
       }
     );
 
