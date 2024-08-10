@@ -14,6 +14,8 @@ import {
 } from "react-native";
 
 import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
+import * as Notifications from "expo-notifications";
 
 import RideContext from "@/hooks/RideProvider";
 
@@ -27,7 +29,7 @@ import { useNavigation } from "expo-router";
 import { Colors, MapStyle } from "@/constants/Style";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { formatDate } from "@/constants/Formatting";
+import { formatDate, formatTime } from "@/constants/Formatting";
 
 const calculateDistance = (
   lat1: number,
@@ -53,6 +55,8 @@ const deg2rad = (deg: number) => {
   return deg * (Math.PI / 180);
 };
 
+const LOCATION_TASK = "LOCATION_TRACKING";
+
 export default function App() {
   const navigation = useNavigation();
 
@@ -62,10 +66,6 @@ export default function App() {
   const [markers, setMarkers] = useState<BikeData[]>([]);
   const { currentRide, fetchCurrentRide } =
     useContext(RideContext);
-
-  // const [bStatus, requestPermission] = Location.useBackgroundPermissions();
-
-  const [locationBlocked, setLocationBlocked] = useState(false);
 
   const [markerColorSetting, setMarkerColorSetting] = useState<boolean>(false);
 
@@ -104,10 +104,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (locationBlocked) {
-      return;
-    }
-
     const goToLocationBlockScreen = async () => {
       navigation.reset({
         index: 0,
@@ -116,46 +112,60 @@ export default function App() {
       navigation.navigate("location");
     };
 
-    const interval = setInterval(() => {
-      (async () => {
-        let location: Location.LocationObject;
-        try{
-          location = await Location.getCurrentPositionAsync({});
-
-        } catch (error) {
-          setLocationBlocked(true);
-          goToLocationBlockScreen();
+    const setupTracking = async () => {
+      TaskManager.defineTask("LOCATION_TRACKING", ({data, error}) => {
+        if(error) {
+          console.error(error);
           return;
         }
-        if (location.mocked) {
-          setLocationBlocked(true);
-          goToLocationBlockScreen();
-          return;
-        }
+      
+        if(data && currentRide) {
+          const location = data.locations[0];
 
-        if (currentRide) {
-          if (currentRide) {
-            const oldLat = parseFloat(currentRide.last_latitude);
-            const oldLon = parseFloat(currentRide.last_longitude);
-            const distance = calculateDistance(
-              oldLat,
-              oldLon,
-              location.coords.latitude,
-              location.coords.longitude
-            );
+          if(location.mocked) {
+            goToLocationBlockScreen();
+            return;
+          }
+      
+          const oldLat = parseFloat(currentRide.last_latitude);
+          const oldLon = parseFloat(currentRide.last_longitude);
+          const distance = calculateDistance(
+            oldLat,
+            oldLon,
+            location.coords.latitude,
+            location.coords.longitude
+          );
+
+          if (distance >= 0.1) {
             currentRide.total_distance += distance;
-            console.log("Distance:", distance);
             currentRide.last_latitude = location.coords.latitude.toFixed(6);
             currentRide.last_longitude = location.coords.longitude.toFixed(6);
           }
         }
-      })();
-    }, 5000);
+      });
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [currentRide, locationBlocked]);
+      await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+        accuracy: Location.Accuracy.BestForNavigation,
+        foregroundService: {
+          notificationTitle: `Huidige rit: ${currentRide!.bike.name}`,
+          notificationBody: `${currentRide!.total_distance}km - ${formatTime(Date.now() - (currentRide!.bike.last_used_on?.getTime() ?? 0))}`,
+          notificationColor: "teal",
+        }
+      });
+    }
+
+    if(currentRide) {
+      const interval = setInterval(() => {
+        setupTracking();
+      }, 1000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      (async () => await Location.stopLocationUpdatesAsync(LOCATION_TASK))();
+    }
+  }, [currentRide]);
 
   const fetchMarkers = async () => {
     try {
@@ -203,11 +213,6 @@ export default function App() {
     );
 
     if (distance > 0.05) {
-      // Toast.show({
-      //   type: "error",
-      //   text1: "Je bent te ver weg van de fiets!",
-      // });
-
       ToastAndroid.showWithGravity("Je bent te ver weg van de fiets!", ToastAndroid.LONG, ToastAndroid.CENTER);
       return;
     }
@@ -222,20 +227,10 @@ export default function App() {
       if (response.ok) {
         setModalVisible(undefined);
 
-        // Toast.show({
-        //   type: "success",
-        //   text1: `Fiets ${marker.name} gereserveerd!`,
-        // });
-
         ToastAndroid.showWithGravity(`Fiets ${marker.name} gereserveerd!`, ToastAndroid.LONG, ToastAndroid.TOP);
 
         fetchCurrentRide();
       } else {
-        // Toast.show({
-        //   type: "error",
-        //   text1: `Fiets ${marker.name} kon niet gereserveerd worden!`,
-        // });
-
         ToastAndroid.showWithGravity(
           `Fiets ${marker.name} kon niet gereserveerd worden!`,
           ToastAndroid.LONG,

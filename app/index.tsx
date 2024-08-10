@@ -56,9 +56,20 @@ export default function LoginScreen() {
           index: 0,
           routes: [{ name: "location" }],
         });
+        navigation.navigate("location");
+      }
+
+      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      if (backgroundStatus !== 'granted') {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "location" }],
+        });
         navigation.navigate("location");  
       }
     }
+
+    
 
     askPermissions();
   }, [navigation]);

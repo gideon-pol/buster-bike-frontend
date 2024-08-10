@@ -27,7 +27,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { DefaultStyle } from "@/constants/Style";
 import { Colors } from "@/constants/Style";
-import { formatDate } from "../../constants/Formatting";
+import { formatDate, formatTime } from "../../constants/Formatting";
 
 export default function TabTwoScreen() {
   const { currentRide, fetchCurrentRide, endCurrentRide } =
@@ -293,28 +293,13 @@ export default function TabTwoScreen() {
 
   return view;
 
-  function formatTime(milliseconds: number): string {
-    const seconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    const formattedTime = `${days.toString().padStart(2, "0")}:${(hours % 24)
-      .toString()
-      .padStart(2, "0")}:${(minutes % 60).toString().padStart(2, "0")}:${(
-      seconds % 60
-    )
-      .toString()
-      .padStart(2, "0")}`;
-    return formattedTime;
-  }
+  
 }
 
 const styles = StyleSheet.create({
   bikeName: {
     fontSize: 40,
     fontWeight: "bold",
-    margin: "2%",
     marginLeft: "5%",
     color: Colors.accent,
   },

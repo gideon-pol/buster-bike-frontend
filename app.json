@@ -2,7 +2,7 @@
   "expo": {
     "name": "busterbike",
     "slug": "busterbike",
-    "version": "3.0.0",
+    "version": "3.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -21,12 +21,19 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.busters.busterbike",
-      "versionCode": 8,
+      "versionCode": 11,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCH2SeiTGqX-J6PJicT29uWm2jkyhDV5G4"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +42,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-build-properties"
+      "expo-build-properties",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Sta toegang tot je locatie in de achtergrond toe",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundLocationEnabled": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

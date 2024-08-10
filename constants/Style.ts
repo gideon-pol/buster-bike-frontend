@@ -19,7 +19,6 @@ export const DefaultStyle = StyleSheet.create({
   },
 });
 
-
 export const MapStyle = {
   dark: [
     {
