@@ -254,7 +254,7 @@ export default function TabTwoScreen() {
                         multiline={true}
                         style={styles.notes}
                         onFocus={() => setModalUp(true)}
-                        onBlur={() => setModalUp(false)}
+                        // onBlur={() => setModalUp(false)}
                         onChangeText={(e) => (currentRide.bike.notes = e)}
                       >
                         {currentRide?.bike.notes}
