@@ -48,6 +48,13 @@ export default function RootLayout() {
     const response = await authenticatedFetch(
       `${ServerInfo.url}/users/reserved/`
     );
+
+    // TODO: Backend sometimes responds with 401 when user is not authenticated but still returns garbage data???
+    if (!response.ok) {
+      setCurrentRide(undefined);
+      return;
+    }
+
     const data = await response.json();
 
     data.last_used_on = new Date(data.last_used_on);
@@ -60,7 +67,6 @@ export default function RootLayout() {
     };
 
     if (data) {
-      // setCurrentBike(data);
       setCurrentRide({
         total_distance: 0,
         last_latitude: data.latitude,
