@@ -28,6 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { DefaultStyle } from "@/constants/Style";
 import { Colors } from "@/constants/Style";
 import { formatDate, formatTime } from "../../constants/Formatting";
+import LoadingButton from "@/components/LoadingButton";
 
 export default function TabTwoScreen() {
   const { currentRide, fetchCurrentRide, endCurrentRide } =
@@ -261,19 +262,20 @@ export default function TabTwoScreen() {
                       </TextInput>
                     </View>
 
-                    <Pressable
+                    <LoadingButton
                       style={[styles.endRideButton, styles.endRideConfirm]}
-                      onPress={() => {
+                      onPress={async () => {
                         setModalVisible(false);
-                        endCurrentRide();
+                        await endCurrentRide();
                       }}
+                      spinnerColor="black"
                     >
                       <Text
                         style={[styles.endRideText, styles.endRideConfirmText]}
                       >
                         Bevestig
                       </Text>
-                    </Pressable>
+                    </LoadingButton>
                   </View>
                 </TouchableWithoutFeedback>
               </GestureHandlerRootView>

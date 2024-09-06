@@ -1,3 +1,4 @@
+import LoadingButton from "@/components/LoadingButton";
 import { ServerInfo } from "@/constants/Server";
 import { Colors, DefaultStyle } from "@/constants/Style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -120,9 +121,12 @@ export default function RegisterScreen() {
             />
           </Pressable>
         </View>
-        <Pressable style={styles.button} onPress={register}>
+        <LoadingButton
+          style= {styles.button}
+            spinnerColor="black"
+          onPress={register}>
           <Text style={styles.buttonText}>Registreer</Text>
-        </Pressable>
+        </LoadingButton>
       </View>
     </SafeAreaView>
   );

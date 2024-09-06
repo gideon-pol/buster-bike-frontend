@@ -1,5 +1,5 @@
 import { ServerInfo } from "@/constants/Server";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -14,12 +14,16 @@ import { authenticatedFetch } from "@/app/fetch";
 import { useNavigation } from "expo-router";
 import { Colors, DefaultStyle } from "@/constants/Style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import UserContext from "@/hooks/UserProvider";
+import LoadingButton from "@/components/LoadingButton";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  const { fetchUserData } = useContext(UserContext);
 
   // State variable to track password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +40,7 @@ export default function LoginScreen() {
   };
 
   const attemptLogin = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const response = await authenticatedFetch(
       `${ServerInfo.url}/users/login/`,
       {
@@ -53,6 +58,7 @@ export default function LoginScreen() {
     if (response.ok) {
       const body = await response.json();
       await AsyncStorage.setItem("token", body["token"]);
+      await fetchUserData();
       gotoMainScreen();
       // navigation.navigate('(tabs)');
     } else {
@@ -116,9 +122,13 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        <Pressable style={styles.button} onPress={attemptLogin}>
+        {/* <Pressable style={styles.button} onPress={attemptLogin}>
           <Text style={styles.buttonText}>Login</Text>
-        </Pressable>
+        </Pressable> */}
+
+        <LoadingButton style={styles.button} onPress={attemptLogin} spinnerColor="black">
+          <Text style={styles.buttonText}>Login</Text>
+        </LoadingButton>
         <Text
           style={{ textAlign: "center", marginTop: "2%", color: Colors.text }}
         >

@@ -1,5 +1,5 @@
 import { Colors, DefaultStyle } from "@/constants/Style";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Modal, Button } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authenticatedFetch } from "@/app/fetch";
@@ -8,59 +8,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useNavigation } from "expo-router";
 import { Switch } from "react-native";
 import { formatDate } from "@/constants/Formatting";
-
-type UserData = {
-  id?: string;
-  username: string;
-  first_name: string;
-  last_name?: string;
-  email?: string;
-  // referral_code?: string;
-  referrer: string;
-  can_refer: boolean,
-  created_at?: string;
-  updated_at?: string;
-};
+import UserContext from "@/hooks/UserProvider";
+import SettingsContext from "@/hooks/SettingsProvider";
+import LoadingButton from "@/components/LoadingButton";
 
 export default function UserScreen() {
-  const [userData, setUserData] = useState<UserData | null>(null);
   const navigation = useNavigation();
 
-  const [markerColorSettingEnabled, setMarkerColorSettingEnabled] = useState(false);
+  const {userData, fetchUserData} = useContext(UserContext);
 
+  const { settings, setSettings } = useContext(SettingsContext);
 
   useEffect(() => {
-    const getMarkerColorSetting = async () => {
-      try {
-        const value = await AsyncStorage.getItem("markerColorSetting");
-        if (value !== null) {
-          setMarkerColorSettingEnabled(value === "true");
-        } else {
-          AsyncStorage.setItem("markerColorSetting", "false");
-        }
-      } catch (error) {
-        console.error("Error retrieving marker color setting:", error);
-      }
-    };
-
-    getMarkerColorSetting();
+    fetchUserData();
   }, []);
 
-
-  const toggleSetting = async (value: boolean) => {
-    setMarkerColorSettingEnabled(value);
-    await AsyncStorage.setItem("markerColorSetting", value? "true" : "false");
+  const toggleMarkerColorSetting = async (value: boolean) => {
+    setSettings({ ...settings, MarkerColorSettingEnabled: value });
   };
 
-  const fetchUserData = async () => {
-    const response = await authenticatedFetch(`${ServerInfo.url}/users/me`);
-    const data = await response.json();
-
-    if (response.status === 200) {
-      setUserData(data);
-    } else {
-      console.error(data);
-    }
+  const toggleOutOfRangeSetting = async (value: boolean) => {
+    setSettings({ ...settings, OutOfRangeBikeEnabled: value });
   };
 
   useEffect(() => {
@@ -81,16 +49,16 @@ export default function UserScreen() {
     );
 
     if (response.ok) {
-      setUserData(null);
+      // setUserData(null);
       await AsyncStorage.removeItem("token");
+  
+      while (router.canGoBack()) {
+        router.back();
+      }
+      router.replace("/login");
+    } else {
+      console.error("Error logging out:", response);
     }
-
-    await AsyncStorage.removeItem("token");
-
-    while (router.canGoBack()) {
-      router.back();
-    }
-    router.replace("/login");
   };
 
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
@@ -121,13 +89,25 @@ export default function UserScreen() {
       </Text>
       
       <View style={{ ...styles.d, alignItems: "flex-start", flexDirection: "row" }}>
-        <Switch value={markerColorSettingEnabled} onValueChange={toggleSetting} 
-          thumbColor={markerColorSettingEnabled ? Colors.accent : Colors.text}
+        <Switch value={settings.MarkerColorSettingEnabled} onValueChange={toggleMarkerColorSetting} 
+          thumbColor={settings.MarkerColorSettingEnabled ? Colors.accent : Colors.text}
           trackColor={{ false: "gray" }}
         />
         <Text style={{...styles.d, marginLeft: 10 }}>
         Markerkleuren voor duur van niet-gebruikte fiets.</Text>
       </View>
+
+      { userData?.can_take_out_of_range && (
+        <View style={{ ...styles.d, alignItems: "flex-start", flexDirection: "row" }}>
+          <Switch value={settings.OutOfRangeBikeEnabled} onValueChange={toggleOutOfRangeSetting} 
+            thumbColor={settings.OutOfRangeBikeEnabled ? Colors.accent : Colors.text}
+            trackColor={{ false: "gray" }}
+          />
+          <Text style={{...styles.d, marginLeft: 10 }}>
+          Fietsen buiten bereik toch pakken.</Text>
+        </View>
+        )
+      }
 
       {
         userData?.can_refer && (
@@ -135,12 +115,13 @@ export default function UserScreen() {
         )
       }
 
-      <Pressable style={styles.logoutButton} onPress={logout}>
+      <LoadingButton style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Uitloggen</Text>
-      </Pressable>
-      <Pressable style={styles.deleteAccountButton} onPress={deletePopup}>
+      </LoadingButton>
+
+      <LoadingButton style={styles.deleteAccountButton} onPress={deletePopup}>
         <Text style={styles.deleteAccountButtonText}>Verwijder Account</Text>
-      </Pressable>
+      </LoadingButton>
       <Modal
         animationType="slide"
         transparent={true}
@@ -192,16 +173,15 @@ export default function UserScreen() {
                 );
 
                 if (response.ok) {
-                  setUserData(null);
+                  // setUserData(null);
                   await AsyncStorage.removeItem("token");
+                  await AsyncStorage.removeItem("token");
+  
+                  while (router.canGoBack()) {
+                    router.back();
+                  }
+                  router.replace("/login");
                 }
-
-                await AsyncStorage.removeItem("token");
-
-                while (router.canGoBack()) {
-                  router.back();
-                }
-                router.replace("/login");
               }}
             >
               <Text

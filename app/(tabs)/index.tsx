@@ -11,6 +11,7 @@ import {
   Image,
   Platform,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 
 import * as Location from "expo-location";
@@ -27,9 +28,19 @@ import { authenticatedFetch } from "@/app/fetch";
 import { BikeData } from "@/constants/Types";
 import { useNavigation } from "expo-router";
 import { Colors, MapStyle } from "@/constants/Style";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { formatDate, formatTime } from "@/constants/Formatting";
+import UserContext from "@/hooks/UserProvider";
+import SettingsContext from "@/hooks/SettingsProvider";
+import LoadingButton from "@/components/LoadingButton";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const calculateDistance = (
   lat1: number,
@@ -67,30 +78,8 @@ export default function App() {
   const { currentRide, fetchCurrentRide } =
     useContext(RideContext);
 
-  const [markerColorSetting, setMarkerColorSetting] = useState<boolean>(false);
-
-  useEffect(() => {
-    const getMarkerColorSetting = async () => {
-      try {
-        const value = await AsyncStorage.getItem("markerColorSetting");
-        if (value !== null) {
-          setMarkerColorSetting(value === "true");
-        } else {
-          AsyncStorage.setItem("markerColorSetting", "false");
-        }
-      } catch (error) {
-        console.error("Error retrieving marker color setting:", error);
-      }
-    };
-
-    const interval = setInterval(() => {
-    getMarkerColorSetting();
-  }, 5000);
-  return () => {
-    clearInterval(interval);
-  };
-
-  }, []);
+  const { userData } = useContext(UserContext);
+  const { settings } = useContext(SettingsContext);
 
   useEffect(() => {
     fetchCurrentRide();
@@ -113,13 +102,14 @@ export default function App() {
     };
 
     const setupTracking = async () => {
-      TaskManager.defineTask("LOCATION_TRACKING", ({data, error}) => {
+      TaskManager.defineTask(LOCATION_TASK, ({data, error}) => {
         if(error) {
           console.error(error);
           return;
         }
       
         if(data && currentRide) {
+          console.log(data);
           const location = data.locations[0];
 
           if(location.mocked) {
@@ -141,29 +131,50 @@ export default function App() {
             currentRide.last_latitude = location.coords.latitude.toFixed(6);
             currentRide.last_longitude = location.coords.longitude.toFixed(6);
           }
+
+          // Notifications.scheduleNotificationAsync({
+          //   identifier: "LOCATION_TRACKING",
+          //   content: {
+          //     title: `Huidige rit: ${currentRide!.bike.name}`,
+          //     body: `${currentRide!.total_distance.toFixed(1)}km - ${formatTime(Date.now() - (currentRide!.bike.last_used_on?.getTime() ?? 0))}`,
+          //     sound: false,
+          //   },
+          //   trigger: null
+          // });
         }
       });
 
       await Location.startLocationUpdatesAsync(LOCATION_TASK, {
-        accuracy: Location.Accuracy.BestForNavigation,
+        accuracy: Location.Accuracy.High,
+        // timeInterval: 1000,
+        
         foregroundService: {
           notificationTitle: `Huidige rit: ${currentRide!.bike.name}`,
-          notificationBody: `${currentRide!.total_distance}km - ${formatTime(Date.now() - (currentRide!.bike.last_used_on?.getTime() ?? 0))}`,
+          // notificationBody: `${currentRide!.total_distance}km - ${formatTime(Date.now() - (currentRide!.bike.last_used_on?.getTime() ?? 0))}`,
+          notificationBody: ``,
           notificationColor: "teal",
         }
       });
     }
 
     if(currentRide) {
-      const interval = setInterval(() => {
-        setupTracking();
-      }, 1000);
+      setupTracking();
 
-      return () => {
-        clearInterval(interval);
-      };
+      // const interval = setInterval(() => {
+      //   setupTracking();
+      // }, 1000);
+
+      // return () => {
+      //   clearInterval(interval);
+      // };
     } else {
-      (async () => await Location.stopLocationUpdatesAsync(LOCATION_TASK))();
+      (async () => {
+        if(await TaskManager.isTaskRegisteredAsync(LOCATION_TASK)) {
+          await Location.stopLocationUpdatesAsync(LOCATION_TASK)
+        }
+        await Notifications.cancelScheduledNotificationAsync("LOCATION_TRACKING");
+        await Notifications.dismissNotificationAsync("LOCATION_TRACKING");
+    })();
     }
   }, [currentRide]);
 
@@ -212,7 +223,7 @@ export default function App() {
       parseFloat(marker.longitude)
     );
 
-    if (distance > 0.05) {
+    if (!(userData?.can_take_out_of_range && settings.OutOfRangeBikeEnabled) && distance > 0.05) {
       ToastAndroid.showWithGravity("Je bent te ver weg van de fiets!", ToastAndroid.LONG, ToastAndroid.CENTER);
       return;
     }
@@ -244,7 +255,7 @@ export default function App() {
   };
 
   const getPinColor = (marker: BikeData): string => {
-    if (markerColorSetting) {
+    if (settings.MarkerColorSettingEnabled) {
       if (marker.last_used_on === null) {
         return "purple";
       }
@@ -376,7 +387,7 @@ export default function App() {
                     <Text style={styles.notes}>{modalData?.notes}</Text>
                   </View>
 
-                  <Pressable
+                  {/* <Pressable
                     style={
                       modalData?.is_in_use
                         ? [
@@ -386,10 +397,43 @@ export default function App() {
                         : styles.reserveButtonBase
                     }
                     onPress={() => {
-                      if (!modalData?.is_in_use) {
-                        attemptReserve(modalData!);
-                      }
+                      const reserve = async () => {
+                        if (!modalData?.is_in_use && !reserveredButtonLoading) {
+                          setReserveredButtonLoading(true);
+                          await attemptReserve(modalData!);
+                          setReserveredButtonLoading(false);
+                        }
+                      };
+
+                      reserve();
                     }}
+                  >
+                    { reserveredButtonLoading ?
+                      <ActivityIndicator size={"large"} color={"white"} />
+                      :
+                      <Text
+                        style={
+                          modalData?.is_in_use
+                            ? styles.reserveButtonTextDisabled
+                            : styles.reserveButtonText
+                        }
+                      >
+                        Reserveren
+                      </Text>
+                  }
+                  </Pressable> */}
+                  
+                  <LoadingButton
+                    onPress={async () => {
+                      if (!modalData?.is_in_use) {
+                        await new Promise((resolve) => setTimeout(resolve, 1000));
+                      }
+                      await attemptReserve(modalData!);
+
+                    }}
+                    disabled={modalData?.is_in_use}
+                    style={styles.reserveButtonBase}
+                    disabledStyle={styles.reserveButtonDisabled}
                   >
                     <Text
                       style={
@@ -400,7 +444,8 @@ export default function App() {
                     >
                       Reserveren
                     </Text>
-                  </Pressable>
+                  </LoadingButton>
+                    
                 </View>
               </TouchableWithoutFeedback>
             </View>

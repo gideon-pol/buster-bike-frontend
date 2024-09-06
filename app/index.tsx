@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -6,15 +6,18 @@ import { useNavigation } from "expo-router";
 import { Colors, DefaultStyle } from "@/constants/Style";
 import * as SplashScreen from "expo-splash-screen";
 import * as Location from "expo-location";
+import * as Notifications from 'expo-notifications';
+import * as TaskManager from "expo-task-manager";
+import UserContext from "@/hooks/UserProvider";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function LoginScreen() {
+export default function SplashView() {
   const navigation = useNavigation();
 
   const [appIsReady, setAppIsReady] = useState(false);
 
-
+  const { fetchUserData } = useContext(UserContext);
   
   useEffect(() => {
     const checkToken = async () => {
@@ -25,7 +28,6 @@ export default function LoginScreen() {
           routes: [{ name: "(tabs)" }, { name: "disclaimer" }],
         });
         navigation.navigate("disclaimer");
-        setAppIsReady(true);
         return;
       }
       
@@ -36,42 +38,54 @@ export default function LoginScreen() {
           routes: [{ name: "(tabs)" }],
         });
         navigation.navigate("(tabs)");
-        setAppIsReady(true);
+        await fetchUserData();
       } else {
         navigation.reset({
           index: 0,
           routes: [{ name: "(tabs)" }, { name: "login" }],
         });
         navigation.navigate("login");
-        setAppIsReady(true);
       }
     };
 
-    checkToken();
-
     const askPermissions = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
+
+      if (notificationStatus !== "granted") {
         navigation.reset({
           index: 0,
           routes: [{ name: "location" }],
         });
         navigation.navigate("location");
+        return;
       }
 
+      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+      if (foregroundStatus !== "granted") {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "location" }],
+        });
+        navigation.navigate("location");
+        return;
+      }
+      
       const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
       if (backgroundStatus !== 'granted') {
         navigation.reset({
           index: 0,
           routes: [{ name: "location" }],
         });
-        navigation.navigate("location");  
+        navigation.navigate("location");
+        return;
       }
     }
-
     
-
-    askPermissions();
+    (async () => {
+      await checkToken();
+      await askPermissions();
+      setAppIsReady(true);
+    })();
   }, [navigation]);
 
   const onLayoutRootView = useCallback(async () => {

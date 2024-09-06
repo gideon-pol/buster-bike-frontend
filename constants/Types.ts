@@ -27,3 +27,22 @@ export type BikeData = {
   total_distance: number;
   notes: string;
 };
+
+export type UserData = {
+  id?: string;
+  username: string;
+  first_name: string;
+  last_name?: string;
+  email?: string;
+  // referral_code?: string;
+  referrer: string;
+  can_refer: boolean,
+  can_take_out_of_range: boolean,
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type Settings = {
+  MarkerColorSettingEnabled: boolean;
+  OutOfRangeBikeEnabled: boolean; 
+};
