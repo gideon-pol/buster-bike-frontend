@@ -517,6 +517,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
+    marginBottom: -2,
     padding: 20,
     paddingVertical: 20,
     alignItems: "flex-start",

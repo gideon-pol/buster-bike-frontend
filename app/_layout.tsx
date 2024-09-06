@@ -17,7 +17,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authenticatedFetch } from "./fetch";
 import { RideData, Settings, UserData } from "@/constants/Types";
 import { ServerInfo } from "@/constants/Server";
-import * as Location from "expo-location";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -68,6 +67,8 @@ export default function RootLayout() {
         last_longitude: data.longitude,
         bike: data,
       });
+    } else {
+      setCurrentRide(undefined);
     }
   };
 
