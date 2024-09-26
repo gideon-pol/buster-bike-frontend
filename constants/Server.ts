@@ -4,5 +4,6 @@ export const ServerInfo = {
     // url: "http://10.0.8.104:8000"
     // url: "http://192.168.178.21:8000"
     // url: "http://192.168.188.119:8000"
-    url: "https://api.busterbike.nl"
+    // url: "https://api.busterbike.nl"
+    url: "https://stalling.buster.casa"
 }

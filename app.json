@@ -2,7 +2,7 @@
   "expo": {
     "name": "BusterBike",
     "slug": "busterbike",
-    "version": "3.1.2",
+    "version": "3.1.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -21,7 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.busters.busterbike",
-      "versionCode": 14,
+      "versionCode": 15,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCH2SeiTGqX-J6PJicT29uWm2jkyhDV5G4"
