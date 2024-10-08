@@ -107,10 +107,12 @@ export default function App() {
           console.error(error);
           return;
         }
+        console.log(data);
       
         if(data && currentRide) {
           console.log(data);
-          const location = data.locations[0];
+          // HERE
+          const location = data.locations[data.locations.length - 1];
 
           if(location.mocked) {
             goToLocationBlockScreen();

@@ -7,6 +7,7 @@ import { useFonts } from "expo-font";
 import { Stack, useNavigation } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
+import * as Location from 'expo-location';
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -80,10 +81,11 @@ export default function RootLayout() {
 
   const endCurrentRide = async () => {
     if (!currentRide) throw new Error("No current ride");
+    //HERE
+    const location = await Location.getCurrentPositionAsync();
+    currentRide.bike.latitude = location.coords.latitude.toString();
+    currentRide.bike.longitude = location.coords.longitude.toString();
 
-    currentRide.bike.latitude = currentRide.last_latitude;
-    currentRide.bike.longitude = currentRide.last_longitude;
-    
     const data = {
       ...currentRide.bike,
       driven_distance: currentRide.total_distance.toFixed(2),
